@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>S4B Linear Functions — Formula, Table &amp; Graph Explorer</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-app: #f4f1ea;
+      --ink-main: #15202b;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background-color: var(--bg-app);
+      color: var(--ink-main);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    }
+
+    .math-font {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+    }
+
+    /* Desktop & iPad Landscape (>= 900px): Full-viewport 3-column dashboard */
+    @media (min-width: 900px) {
+      html, body {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      #appShell {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      .tri-grid {
+        display: grid;
+        grid-template-columns: minmax(250px, 0.95fr) minmax(245px, 0.9fr) minmax(360px, 1.35fr);
+        gap: 10px;
+        flex: 1 1 0%;
+        min-height: 0;
+      }
+      .tri-grid.maximized {
+        grid-template-columns: minmax(255px, 0.85fr) minmax(420px, 1.65fr);
+      }
+      .tri-grid.maximized #panelAlgebraic {
+        display: none;
+      }
+      #graphPlotStage {
+        flex: 1 1 0%;
+        min-height: 300px;
+        height: 100%;
+      }
+    }
+
+    /* Mobile & Portrait Preview (< 900px): Clean vertical scrolling with explicit graph height */
+    @media (max-width: 899px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      #appShell {
+        height: auto;
+        min-height: 100dvh;
+      }
+      .tri-grid, .tri-grid.maximized {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .tri-grid.maximized #panelAlgebraic {
+        display: flex;
+      }
+      /* Explicit pixel height prevents iOS WebKit 0px flex collapse */
+      #graphPlotStage {
+        height: 360px;
+        min-height: 360px;
+        width: 100%;
+        flex: none;
+      }
+    }
+
+    /* Lock browser gestures on interactive graph stage */
+    .touch-none-lock {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Dedicated full-size SVG mounts for iOS Safari reliability */
+    .svg-layer-mount {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #inkMount {
+      pointer-events: none;
+      z-index: 10;
+    }
+    body.write-mode #inkMount {
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+
+    /* 3-Representation Spotlight Rings (Key Take-away Point 3) */
+    .spot-ring-1 {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22);
+    }
+    .spot-ring-2 {
+      border-color: #d97706 !important;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.22);
+    }
+    .spot-ring-3 {
+      border-color: #0f766e !important;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+    }
+
+    /* Collaborative Task Key-Word Underline + Warm Highlight */
+    .kw-ul {
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 5px;
+      text-decoration-color: #15202b;
+      background: rgba(251, 191, 36, 0.28);
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f1ea] text-slate-900">
+  <div id="appShell" class="flex flex-col w-full p-2 sm:p-2.5 gap-2">
+
+    <!-- ===================================================================
+         TOP NAVIGATION BAR (Touch targets >= 44px)
+         =================================================================== -->
+    <header class="bg-slate-900 text-white rounded-xl px-2.5 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 shadow-sm">
+      <!-- Left Mode Tabs -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button id="navAB" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition border bg-white text-slate-900 border-white shadow-sm">
+          <span>Compare A &amp; B</span>
+          <span class="text-[11px] font-semibold opacity-80">(比較 A/B)</span>
+        </button>
+
+        <button id="navCD" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition border bg-white/10 text-slate-100 border-white/20 hover:bg-white/20">
+          <span>Compare C &amp; D</span>
+          <span class="text-[11px] font-semibold opacity-80">(比較 C/D)</span>
+        </button>
+
+        <button id="navDomains" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition border bg-amber-100 text-amber-950 border-amber-400 hover:bg-amber-200">
+          <span>☑ Conclusion: Compare Domains</span>
+          <span class="text-[11px] font-semibold opacity-85">(總結定義域)</span>
+        </button>
+
+        <button id="navTakeaway" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition border bg-indigo-600 text-white border-indigo-400 hover:bg-indigo-500">
+          <span>★ Key Take-away</span>
+          <span class="text-[11px] font-semibold opacity-95">(重點總結)</span>
+        </button>
+      </div>
+
+      <!-- Right Interaction & Challenge Controls -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button id="btnModeInteract" type="button" class="min-h-[44px] px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 transition border bg-teal-700 text-white border-teal-400">
+          <span>Interact (互動)</span>
+        </button>
+
+        <button id="btnModeWrite" type="button" class="min-h-[44px] px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 transition border bg-white/10 text-slate-100 border-white/20 hover:bg-white/20">
+          <span>Write ✎ (手寫)</span>
+        </button>
+
+        <button id="btnOpenCollabModal" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1 transition border bg-[#fdf4e3] text-slate-900 border-[#f3dec0] hover:bg-[#faeccf] shadow-sm">
+          <span>💡 Collaborative Conclusion</span>
+        </button>
+
+        <button id="btnOpenChallenges" type="button" class="min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1 transition border bg-amber-500/20 text-amber-200 border-amber-400/50 hover:bg-amber-500/30">
+          <span>🏆 Challenges</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===================================================================
+         CONTEXT STRIP 1: SCENARIO CARDS SELECTOR (Cards A, B, C, D, Noodles)
+         =================================================================== -->
+    <section id="stripCards" class="bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-2 shrink-0 shadow-sm">
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button id="preAB" type="button" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-800">A vs B</button>
+        <button id="preCD" type="button" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-800">C vs D</button>
+        <button id="preABCD" type="button" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-800">All A–D</button>
+
+        <span class="hidden sm:inline-block h-5 w-[1.5px] bg-slate-200 mx-0.5"></span>
+
+        <label id="pillA" class="min-h-[40px] px-2.5 rounded-lg border-2 border-teal-700 bg-teal-50/70 flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkA" checked class="w-4 h-4 accent-teal-700 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-teal-700 inline-block shrink-0"></span>
+          <span>Card A <small class="text-slate-600">(20+5x, x≥1)</small></span>
+        </label>
+
+        <label id="pillB" class="min-h-[40px] px-2.5 rounded-lg border-2 border-amber-600 bg-amber-50/70 flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkB" checked class="w-4 h-4 accent-amber-600 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-amber-700 inline-block shrink-0"></span>
+          <span>Card B <small class="text-slate-600">(20+5x, ℤ⁺)</small></span>
+        </label>
+
+        <label id="pillC" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkC" class="w-4 h-4 accent-purple-700 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-white border-[2.5px] border-purple-600 inline-block shrink-0"></span>
+          <span>Card C <small class="text-slate-600">(10+10x, x&gt;0)</small></span>
+        </label>
+
+        <label id="pillD" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkD" class="w-4 h-4 accent-pink-700 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-pink-700 inline-block shrink-0"></span>
+          <span>Card D <small class="text-slate-600">(10+10x, ℤ⁺)</small></span>
+        </label>
+
+        <label id="pillNoodles" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkNoodles" class="w-4 h-4 accent-emerald-700 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shrink-0"></span>
+          <span>🍜 Noodles <small class="text-slate-600">(10+6x)</small></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         CONTEXT STRIP 2: CONCLUSION DOMAIN COMPARISON
+         =================================================================== -->
+    <section id="stripDomains" class="hidden bg-amber-50/90 border-2 border-amber-400 rounded-xl px-2.5 py-1.5 flex-wrap items-center justify-between gap-2 shrink-0 shadow-sm">
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-xs font-extrabold text-amber-950">Formula:</span>
+        <button type="button" data-cformula="noodle" class="cformula-btn min-h-[40px] px-2.5 rounded-lg border-2 border-amber-800 bg-amber-700 text-white font-extrabold text-xs">
+          y = 6x + 10 (車仔麵)
+        </button>
+        <button type="button" data-cformula="ab" class="cformula-btn min-h-[40px] px-2.5 rounded-lg border border-amber-600 bg-white text-amber-950 font-extrabold text-xs">
+          y = 5x + 20 (A/B)
+        </button>
+        <button type="button" data-cformula="cd" class="cformula-btn min-h-[40px] px-2.5 rounded-lg border border-amber-600 bg-white text-amber-950 font-extrabold text-xs">
+          y = 10x + 10 (C/D)
+        </button>
+
+        <span class="hidden sm:inline-block h-5 w-[1.5px] bg-amber-300 mx-0.5"></span>
+
+        <label id="pillDomReal" class="min-h-[40px] px-2.5 rounded-lg border-2 border-blue-600 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkDomReal" checked class="w-4 h-4 accent-blue-600 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block shrink-0"></span>
+          <span>All real ℝ (所有實數)</span>
+        </label>
+
+        <label id="pillDomNonNegReal" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkDomNonNegReal" class="w-4 h-4 accent-emerald-600 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shrink-0"></span>
+          <span>Non-neg real x ≥ 0 (非負實數)</span>
+        </label>
+
+        <label id="pillDomInt" class="min-h-[40px] px-2.5 rounded-lg border-2 border-red-600 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkDomInt" checked class="w-4 h-4 accent-red-600 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-red-600 inline-block shrink-0"></span>
+          <span>All integers ℤ (所有整數)</span>
+        </label>
+
+        <label id="pillDomNonNegInt" class="min-h-[40px] px-2.5 rounded-lg border border-slate-300 bg-white flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold">
+          <input type="checkbox" id="chkDomNonNegInt" class="w-4 h-4 accent-purple-600 cursor-pointer" />
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block shrink-0"></span>
+          <span>Non-neg int {0,1,2,...} (非負整數)</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         CONTEXT STRIP 3: ★ KEY TAKE-AWAY INTERACTIVE VISUAL SUMMARY
+         =================================================================== -->
+    <section id="stripTakeaway" class="hidden bg-indigo-950 text-white border-2 border-indigo-400 rounded-xl p-2.5 flex-col gap-2 shrink-0 shadow-md">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-800 pb-1.5">
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span class="bg-amber-400 text-slate-950 text-xs font-black uppercase px-2 py-0.5 rounded">Key take-away</span>
+          <span class="text-base sm:text-lg font-extrabold text-white">Functions... <span class="text-xs sm:text-sm font-semibold text-indigo-200">(重點總結：函數⋯⋯)</span></span>
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span id="tkProgressLabel" class="text-xs font-bold text-indigo-200 mr-1">Revealed: 1 / 3</span>
+          <button id="btnRevealNextTk" type="button" class="min-h-[40px] px-3 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs transition">
+            Reveal Next (顯示下一重點)
+          </button>
+          <button id="btnShowAllTk" type="button" class="min-h-[40px] px-2.5 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-white border border-indigo-600 font-bold text-xs">
+            Show All
+          </button>
+          <button id="btnResetTk" type="button" class="min-h-[40px] px-2.5 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 font-bold text-xs">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- 3 Clickable Take-away Cards Driving the Live Panels -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <!-- Card 1 -->
+        <div id="tkCard1" class="rounded-xl p-2.5 border-2 border-amber-400 bg-indigo-900 cursor-pointer transition flex flex-col justify-between gap-2">
+          <div>
+            <div class="text-xs sm:text-sm font-extrabold leading-snug text-white">
+              • have different <span class="text-amber-300 underline">domains</span> according to the scenario.
+            </div>
+            <div class="text-[11.5px] font-semibold text-indigo-200 mt-0.5">
+              （按不同情境有不同的定義域。）
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1 pt-1 border-t border-indigo-800">
+            <button type="button" data-tk1="ab" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-extrabold bg-amber-400 text-slate-950">A vs B (20+5x)</button>
+            <button type="button" data-tk1="cd" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">C vs D (10+10x)</button>
+            <button type="button" data-tk1="rz" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">ℝ vs ℤ (6x+10)</button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div>
+          <div id="tkLocked2" class="h-full min-h-[84px] rounded-xl p-2.5 border border-dashed border-indigo-500 bg-indigo-950/60 flex items-center justify-center text-center cursor-pointer hover:bg-indigo-900/40">
+            <span class="text-xs font-bold text-indigo-300">Point 2 Hidden — Tap to Reveal<br/><span class="text-[11px] opacity-80">(點擊顯示第二重點)</span></span>
+          </div>
+          <div id="tkCard2" class="hidden h-full rounded-xl p-2.5 border border-indigo-700 bg-indigo-900/50 cursor-pointer transition flex-col justify-between gap-2">
+            <div>
+              <div class="text-xs sm:text-sm font-extrabold leading-snug text-white">
+                • are applied in our <span class="text-emerald-300 underline">daily lives</span>.
+              </div>
+              <div class="text-[11.5px] font-semibold text-indigo-200 mt-0.5">
+                （應用於日常生活中。）
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1 pt-1 border-t border-indigo-800">
+              <button type="button" data-tk2="noodles" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-extrabold bg-amber-400 text-slate-950">🍜 Cart Noodles (10+6x)</button>
+              <button type="button" data-tk2="abcd" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">🛍️ Cards A–D</button>
+              <button type="button" data-tk2="thomas" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">💻 DSE Thomas (560n+4800)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div>
+          <div id="tkLocked3" class="h-full min-h-[84px] rounded-xl p-2.5 border border-dashed border-indigo-500 bg-indigo-950/60 flex items-center justify-center text-center cursor-pointer hover:bg-indigo-900/40">
+            <span class="text-xs font-bold text-indigo-300">Point 3 Hidden — Tap to Reveal<br/><span class="text-[11px] opacity-80">(點擊顯示第三重點)</span></span>
+          </div>
+          <div id="tkCard3" class="hidden h-full rounded-xl p-2.5 border border-indigo-700 bg-indigo-900/50 cursor-pointer transition flex-col justify-between gap-2">
+            <div>
+              <div class="text-xs sm:text-sm font-extrabold leading-snug text-white">
+                • have <span class="text-sky-300">algebraic</span>, <span class="text-amber-300">tabular</span>, and <span class="text-teal-300">graphical</span> representations.
+              </div>
+              <div class="text-[11.5px] font-semibold text-indigo-200 mt-0.5">
+                （具有代數（公式）、數值表及圖像三種表示方式。）
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1 pt-1 border-t border-indigo-800">
+              <button type="button" data-tk3="B" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-extrabold bg-amber-400 text-slate-950">Card B</button>
+              <button type="button" data-tk3="A" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">Card A</button>
+              <button type="button" data-tk3="C" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">Card C</button>
+              <button type="button" data-tk3="D" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">Card D</button>
+              <button type="button" data-tk3="noodles" class="min-h-[34px] px-2 rounded-md text-[11.5px] font-bold bg-indigo-800 text-indigo-100">Cart Noodles</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         MAIN 3-COLUMN LINKED REPRESENTATIONS STAGE
+         =================================================================== -->
+    <main id="triGrid" class="tri-grid">
+
+      <!-- 1. ALGEBRAIC REPRESENTATION -->
+      <section id="panelAlgebraic" class="bg-white border-2 border-slate-300 rounded-2xl flex flex-col min-h-0 min-w-0 overflow-hidden shadow-sm transition-all">
+        <div class="px-3 py-2 bg-slate-100 border-b border-slate-300 flex items-center justify-between gap-2 shrink-0 min-h-[46px]">
+          <div class="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-1.5">
+            <span id="badge1" class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-800 text-white text-xs font-black">1</span>
+            <span>Algebraic</span>
+            <span class="text-xs font-semibold text-slate-600">(公式及定義域)</span>
+          </div>
+        </div>
+
+        <div class="flex-1 min-h-0 overflow-y-auto p-2.5 flex flex-col gap-2">
+          <div id="algebraicCardsMount" class="flex flex-col gap-2"></div>
+
+          <!-- Interactive Try Input x Box -->
+          <div class="mt-auto border-2 border-slate-300 rounded-xl p-2.5 bg-slate-50 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span id="tryInputHeading" class="text-xs sm:text-sm font-extrabold text-slate-900">
+                Try Input <i class="math-font">x</i> <span class="font-semibold text-slate-600">(測試輸入值)</span>
+              </span>
+            </div>
+
+            <div class="bg-amber-50 border-l-4 border-amber-500 rounded px-2.5 py-1.5 text-xs font-bold text-amber-950 leading-snug">
+              “The calculator can do it. Does the shop allow it?”
+              <span class="block text-[11px] font-semibold text-amber-800 mt-0.5">(計算機算得到，店舖又容許嗎？)</span>
+            </div>
+
+            <button id="btnOpenKeypad" type="button" class="min-h-[44px] w-full px-3 rounded-lg border-2 border-teal-700 bg-white hover:bg-teal-50/40 flex items-center justify-between cursor-pointer">
+              <span class="math-font text-lg font-bold text-slate-900">
+                <i id="varSymText">x</i> = <strong id="valSymText">1.5</strong>
+              </span>
+              <span class="text-xs font-extrabold text-teal-800 bg-teal-100 px-2 py-1 rounded">⌨ Keypad (輸入)</span>
+            </button>
+
+            <div id="quickChipsMount" class="flex flex-wrap gap-1"></div>
+            <div id="verdictsMount" class="flex flex-col gap-1.5 pt-1.5 border-t border-dashed border-slate-300 text-xs"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. TABULAR REPRESENTATION -->
+      <section id="panelTabular" class="bg-white border-2 border-slate-300 rounded-2xl flex flex-col min-h-0 min-w-0 overflow-hidden shadow-sm transition-all">
+        <div class="px-3 py-2 bg-slate-100 border-b border-slate-300 flex items-center justify-between gap-2 shrink-0 min-h-[46px]">
+          <div class="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-1.5">
+            <span id="badge2" class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-800 text-white text-xs font-black">2</span>
+            <span>Tabular</span>
+            <span class="text-xs font-semibold text-slate-600">(數值表)</span>
+          </div>
+          <button id="btnTableKeypad" type="button" class="min-h-[36px] px-2.5 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-800 hover:bg-slate-50">
+            <i class="math-font" id="tblVarSym">x</i> = <span id="tblXVal">1.5</span> ⌨
+          </button>
+        </div>
+
+        <div class="flex-1 min-h-0 overflow-y-auto p-2.5 flex flex-col gap-2">
+          <div id="tableMount"></div>
+
+          <div class="text-xs leading-relaxed text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+            <strong class="text-slate-800">Tip:</strong> Tap any row in the table to highlight it on the graph! A table shows selected values (<strong class="text-slate-800">⋮</strong>), not an upper limit.
+            <span class="block mt-0.5">(點擊數值表任何一行即可在圖像標示；數值表只顯示部分數值，並非上限。)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. GRAPHICAL REPRESENTATION (ZERO OVERLAPPING FLOATING ELEMENTS!) -->
+      <section id="panelGraphical" class="bg-white border-2 border-slate-300 rounded-2xl flex flex-col min-h-0 min-w-0 overflow-hidden shadow-sm transition-all">
+        <!-- Graphical Header -->
+        <div class="px-3 py-2 bg-slate-100 border-b border-slate-300 flex items-center justify-between gap-2 shrink-0 min-h-[46px]">
+          <div class="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-1.5">
+            <span id="badge3" class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-800 text-white text-xs font-black">3</span>
+            <span>Graphical</span>
+            <span class="text-xs font-semibold text-slate-600">(圖像)</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="btnToggleLabels" type="button" class="min-h-[38px] px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800">
+              Point Labels: OFF
+            </button>
+            <button id="btnMaximizeGraph" type="button" class="hidden md:inline-flex min-h-[38px] px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 items-center">
+              ⛶ Maximize Graph
+            </button>
+          </div>
+        </div>
+
+        <!-- Dedicated Non-Overlapping Legend Strip Above Graph -->
+        <div id="graphLegendStrip" class="px-3 py-1.5 bg-slate-50 border-b border-slate-200 text-xs leading-snug flex flex-wrap items-center gap-x-4 gap-y-1 shrink-0">
+          <span><strong class="text-teal-700">● Card A:</strong> C<sub>A</sub>(x) = 20 + 5x, real x ≥ 1</span>
+          <span><strong class="text-amber-700">● Card B:</strong> C<sub>B</sub>(x) = 20 + 5x, x ∈ {1, 2, 3, ...}</span>
+        </div>
+
+        <!-- Dedicated Non-Overlapping Apple Pencil Toolbar (Visible ONLY in Write Mode) -->
+        <div id="inkToolbar" class="hidden px-2.5 py-1.5 bg-slate-900 text-white border-b border-slate-700 flex-wrap items-center justify-between gap-1.5 shrink-0">
+          <div class="flex flex-wrap items-center gap-1">
+            <button type="button" data-inktool="pen" id="toolPen" class="min-h-[38px] px-2.5 rounded-lg text-xs font-bold bg-white text-slate-900">Pen</button>
+            <button type="button" data-inktool="highlighter" id="toolHighlighter" class="min-h-[38px] px-2.5 rounded-lg text-xs font-bold bg-white/10 text-white">Highlighter</button>
+            <button type="button" data-inktool="eraser" id="toolEraser" class="min-h-[38px] px-2.5 rounded-lg text-xs font-bold bg-white/10 text-white">Eraser</button>
+
+            <span class="w-[1px] h-5 bg-white/20 mx-1"></span>
+
+            <button type="button" data-inkcolor="#dc2626" class="ink-swatch w-7 h-7 rounded-full bg-[#dc2626] border-2 border-white scale-110" title="Red"></button>
+            <button type="button" data-inkcolor="#2563eb" class="ink-swatch w-7 h-7 rounded-full bg-[#2563eb] border-2 border-white/40" title="Blue"></button>
+            <button type="button" data-inkcolor="#059669" class="ink-swatch w-7 h-7 rounded-full bg-[#059669] border-2 border-white/40" title="Green"></button>
+            <button type="button" data-inkcolor="#eab308" class="ink-swatch w-7 h-7 rounded-full bg-[#eab308] border-2 border-white/40" title="Yellow"></button>
+          </div>
+          <div class="flex items-center gap-1">
+            <button type="button" id="btnPencilOnly" class="min-h-[38px] px-2 rounded-lg text-xs font-bold bg-white/10 text-white border border-white/20">Pencil Only: OFF</button>
+            <button type="button" id="btnInkUndo" class="min-h-[38px] px-2.5 rounded-lg text-xs font-bold bg-white/10 text-white">Undo</button>
+            <button type="button" id="btnInkClear" class="min-h-[38px] px-2.5 rounded-lg text-xs font-bold bg-red-600 text-white">Clear</button>
+          </div>
+        </div>
+
+        <!-- Pure Coordinate Plot Area (Static SVG Pre-Rendered for Instant Display + Dynamic Re-Mount) -->
+        <div id="graphPlotStage" class="relative w-full bg-white overflow-hidden touch-none-lock">
+          <div id="graphMount" class="svg-layer-mount touch-none-lock">
+            <!-- Static Initial SVG Plot of Card A & Card B (Visible Immediately Even Before JS Runs) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="600" height="380" style="display:block;width:100%;height:100%;touch-action:none;">
+              <rect x="0" y="0" width="600" height="380" fill="#ffffff" />
+              <g stroke="#e2e8f0" stroke-width="1">
+                <line x1="58" y1="0" x2="58" y2="380" /><line x1="155" y1="0" x2="155" y2="380" />
+                <line x1="252" y1="0" x2="252" y2="380" /><line x1="348" y1="0" x2="348" y2="380" />
+                <line x1="445" y1="0" x2="445" y2="380" /><line x1="542" y1="0" x2="542" y2="380" />
+                <line x1="0" y1="354" x2="600" y2="354" /><line x1="0" y1="290" x2="600" y2="290" />
+                <line x1="0" y1="225" x2="600" y2="225" /><line x1="0" y1="161" x2="600" y2="161" />
+                <line x1="0" y1="97" x2="600" y2="97" /><line x1="0" y1="32" x2="600" y2="32" />
+              </g>
+              <line x1="0" y1="354" x2="600" y2="354" stroke="#1e293b" stroke-width="2" />
+              <line x1="58" y1="0" x2="58" y2="380" stroke="#1e293b" stroke-width="2" />
+              <line x1="155" y1="193" x2="590" y2="48" stroke="#0f766e" stroke-width="4.5" stroke-linecap="round" />
+              <circle cx="155" cy="193" r="7" fill="#fbbf24" stroke="#b45309" stroke-width="2.5" />
+              <circle cx="252" cy="161" r="7" fill="#fbbf24" stroke="#b45309" stroke-width="2.5" />
+              <circle cx="348" cy="129" r="7" fill="#fbbf24" stroke="#b45309" stroke-width="2.5" />
+              <circle cx="445" cy="97" r="7" fill="#fbbf24" stroke="#b45309" stroke-width="2.5" />
+              <circle cx="542" cy="64" r="7" fill="#fbbf24" stroke="#b45309" stroke-width="2.5" />
+            </svg>
+          </div>
+          <div id="inkMount" class="svg-layer-mount touch-none-lock"></div>
+        </div>
+
+        <!-- Dedicated Non-Overlapping Graph Footer Bar (Mode Hint Left, Zoom Buttons Right) -->
+        <div id="graphFooterBar" class="px-3 py-1.5 bg-slate-100 border-t border-slate-300 flex items-center justify-between flex-wrap gap-2 shrink-0">
+          <span id="graphModeHint" class="text-xs font-bold text-slate-700">
+            Interact: Drag to pan · Pinch to zoom · Tap points
+          </span>
+          <div class="flex items-center gap-1.5 ml-auto">
+            <button id="btnZoomOut" type="button" class="min-w-[42px] min-h-[40px] px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-base" title="Zoom Out">−</button>
+            <button id="btnZoomIn" type="button" class="min-w-[42px] min-h-[40px] px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-base" title="Zoom In">+</button>
+            <button id="btnZoomFit" type="button" class="min-h-[40px] px-3 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs sm:text-sm">Fit (重設)</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================================================================
+         COLLABORATIVE TASK CONCLUSION BANNER (Docked Below 3 Columns)
+         =================================================================== -->
+    <footer id="collabFooterBanner" class="bg-[#fdf4e3] border-2 border-[#f3dec0] rounded-xl px-3.5 py-2 flex items-center justify-between gap-3 shrink-0 shadow-sm">
+      <!-- Collaborative Task Mode Content -->
+      <div id="footerCollabContent" class="flex items-center gap-3 flex-1 min-w-0">
+        <!-- Minimalist Stick Figure + Glowing Lightbulb Inline SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 96" width="44" height="58" class="shrink-0" aria-hidden="true">
+          <!-- Lightbulb Rays -->
+          <line x1="34" y1="3" x2="34" y2="9" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="17" y1="9" x2="22" y2="14" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="51" y1="9" x2="46" y2="14" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="12" y1="22" x2="18" y2="23" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" />
+          <!-- Warm Bulb Glow + Outline -->
+          <circle cx="34" cy="21" r="9" fill="rgba(251, 191, 36, 0.38)" />
+          <path d="M28,25 C25,21 26,14 34,14 C42,14 43,21 40,25 C39,27 38,28 38,30 L30,30 C30,28 29,27 28,25 Z" fill="#fde68a" stroke="#15202b" stroke-width="2.6" stroke-linejoin="round" />
+          <rect x="30.5" y="30" width="7" height="3.5" rx="1" fill="#15202b" />
+          <!-- Stick Figure Head -->
+          <ellipse cx="34" cy="46" rx="7.5" ry="8.5" fill="none" stroke="#15202b" stroke-width="2.8" />
+          <!-- Torso -->
+          <path d="M34,54.5 Q33,66 34,75" fill="none" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" />
+          <!-- Left Arm (Hand on Hip) -->
+          <path d="M33.5,58 L23,65 L33,70" fill="none" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- Right Arm (Raised Pointing Up) -->
+          <path d="M34.5,58 L46,64 L52,45" fill="none" stroke="#15202b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- Legs & Loop Feet -->
+          <path d="M34,75 L27,89 C22,88 18,90 20,92.5 C22,94 27,92 28,89" fill="none" stroke="#15202b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M34,75 L41,89 C46,88 50,90 48,92.5 C46,94 41,92 40,89" fill="none" stroke="#15202b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+        <div class="min-w-0 flex-1">
+          <div class="text-[11.5px] sm:text-xs tracking-tight text-slate-900 leading-none mb-1">
+            <strong class="font-extrabold">Collaborative</strong> <span class="font-normal">(合作)</span> <strong class="font-extrabold">Task</strong>
+          </div>
+          <div class="text-sm sm:text-base lg:text-[18px] font-semibold text-slate-900 leading-snug">
+            Even with the same <span class="kw-ul">formula</span>, functions have different <span class="kw-ul">domain</span> according to the <span class="kw-ul">scenario</span>.
+          </div>
+          <div class="text-xs font-medium text-slate-700 mt-0.5">
+            (即使公式相同，函數亦會按情境而有不同的定義域。)
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain / DSE Mode Secondary Takeaway (Hidden in Cards Mode) -->
+      <div id="footerOtherContent" class="hidden flex-1 min-w-0">
+        <div id="footerEn" class="text-xs sm:text-sm font-extrabold text-slate-900"></div>
+        <div id="footerZh" class="text-xs font-semibold text-slate-700 mt-0.5"></div>
+      </div>
+
+      <!-- Enlarge to Full Projection Card Button -->
+      <button id="btnEnlargeCollab" type="button" class="min-h-[42px] px-3 rounded-lg bg-amber-200/80 hover:bg-amber-300/80 border border-amber-400 text-slate-900 font-extrabold text-xs shrink-0 flex items-center gap-1">
+        <span>⛶ Enlarge Card</span>
+        <span class="hidden sm:inline">(放大投影)</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 0: FULL-PROJECTION COLLABORATIVE TASK CONCLUSION CARD
+       ===================================================================== -->
+  <div id="modalCollabConclusion" class="hidden fixed inset-0 z-50 bg-slate-950/60 items-center justify-center p-4">
+    <div class="bg-[#fdf4e3] border-2 border-[#f3dec0] rounded-2xl w-full max-w-[780px] p-6 sm:p-9 shadow-2xl relative">
+      <div class="flex items-center justify-between gap-4 mb-5">
+        <div class="text-xl sm:text-2xl text-slate-950 tracking-tight">
+          <strong class="font-extrabold">Collaborative</strong> <span class="font-normal">(合作)</span> <strong class="font-extrabold">Task</strong>
+        </div>
+        <button type="button" data-close="modalCollabConclusion" class="min-h-[44px] px-3.5 rounded-xl bg-slate-900/10 hover:bg-slate-900/20 text-slate-900 font-extrabold text-sm">
+          ✕ Close (返回圖像)
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-6 sm:gap-10 py-2">
+        <!-- Large Crisp Stick Figure + Lightbulb SVG matching teacher's slide -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 124" width="118" height="162" class="shrink-0" aria-hidden="true">
+          <line x1="42" y1="5" x2="42" y2="13" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" />
+          <line x1="21" y1="12" x2="27" y2="18" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" />
+          <line x1="63" y1="12" x2="57" y2="18" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" />
+          <line x1="14" y1="28" x2="22" y2="30" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" />
+          <circle cx="42" cy="28" r="12" fill="rgba(251, 191, 36, 0.35)" />
+          <path d="M34,33 C30,28 31,19 42,19 C53,19 54,28 50,33 C48.5,35.5 47,37 47,40 L37,40 C37,37 35.5,35.5 34,33 Z" fill="#fde68a" stroke="#15202b" stroke-width="3.2" stroke-linejoin="round" />
+          <rect x="37.5" y="40" width="9" height="4.5" rx="1.2" fill="#15202b" />
+          <!-- Head -->
+          <ellipse cx="42" cy="60" rx="9.5" ry="11" fill="none" stroke="#15202b" stroke-width="3.4" />
+          <!-- Body -->
+          <path d="M42,71 Q40.5,86 42,97" fill="none" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" />
+          <!-- Left Arm on Hip -->
+          <path d="M41.5,76 L28,84 L41,90" fill="none" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- Right Arm Pointing Up -->
+          <path d="M42.5,76 L57,83 L64,58" fill="none" stroke="#15202b" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- Legs & Feet -->
+          <path d="M42,97 L33,115 C26,113.5 21,116 24,119.5 C26.5,121.5 33,119 34.5,115" fill="none" stroke="#15202b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M42,97 L51,115 C58,113.5 63,116 60,119.5 C57.5,121.5 51,119 49.5,115" fill="none" stroke="#15202b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+        <div class="flex-1 text-left">
+          <p class="text-2xl sm:text-[34px] font-medium text-slate-950 leading-[1.42] m-0">
+            Even with the same <span class="kw-ul">formula</span>,<br class="hidden sm:inline" />
+            functions have different <span class="kw-ul">domain</span><br class="hidden sm:inline" />
+            according to the <span class="kw-ul">scenario</span>.
+          </p>
+          <p class="text-base sm:text-xl font-semibold text-slate-700 mt-4 mb-0 leading-relaxed">
+            (即使公式相同，函數亦會按情境而有不同的定義域。)
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 1: FLOATING IN-APP NUMERIC KEYPAD (Prevents iPad Safari Squish)
+       ===================================================================== -->
+  <div id="modalKeypad" class="hidden fixed inset-0 z-50 bg-slate-950/50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[340px] overflow-hidden shadow-2xl border border-slate-300">
+      <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+        <strong class="text-sm">⌨ Enter Test Input (輸入測試數值)</strong>
+        <button type="button" data-close="modalKeypad" class="min-h-[38px] min-w-[38px] rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold">✕</button>
+      </div>
+      <div class="p-3.5">
+        <div id="kpDisplay" class="w-full min-h-[50px] px-3 py-2 mb-2.5 rounded-xl bg-slate-100 border-2 border-slate-300 text-right math-font text-2xl font-extrabold text-slate-900 flex items-center justify-end">
+          1.5
+        </div>
+
+        <div id="kpThomasBtnWrap" class="hidden mb-2.5">
+          <button type="button" data-kp="thomas22600" class="w-full min-h-[44px] px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-400 text-blue-900 font-extrabold text-xs">
+            Test S = $22,600 → n = 445/14 ≈ 31.79
+          </button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" data-kp="7" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">7</button>
+          <button type="button" data-kp="8" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">8</button>
+          <button type="button" data-kp="9" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">9</button>
+          <button type="button" data-kp="bksp" class="min-h-[48px] rounded-xl bg-amber-100 hover:bg-amber-200 font-extrabold text-sm text-amber-950">⌫</button>
+
+          <button type="button" data-kp="4" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">4</button>
+          <button type="button" data-kp="5" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">5</button>
+          <button type="button" data-kp="6" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">6</button>
+          <button type="button" data-kp="clr" class="min-h-[48px] rounded-xl bg-red-100 hover:bg-red-200 font-extrabold text-xs text-red-900">Clear</button>
+
+          <button type="button" data-kp="1" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">1</button>
+          <button type="button" data-kp="2" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">2</button>
+          <button type="button" data-kp="3" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">3</button>
+          <button type="button" data-kp="minus" class="min-h-[48px] rounded-xl bg-slate-200 hover:bg-slate-300 font-extrabold text-base text-slate-900">±</button>
+
+          <button type="button" data-kp="0" class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-lg text-slate-900">0</button>
+          <button type="button" data-kp="." class="min-h-[48px] rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xl text-slate-900">.</button>
+          <button type="button" data-kp="ok" class="col-span-2 min-h-[48px] rounded-xl bg-teal-700 hover:bg-teal-800 font-extrabold text-sm text-white">OK (套用)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: 🏆 CHALLENGES TEACHER ANSWER CHECK
+       ===================================================================== -->
+  <div id="modalChallenges" class="hidden fixed inset-0 z-50 bg-slate-950/50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-[720px] max-h-[88dvh] flex flex-col overflow-hidden shadow-2xl border border-slate-300">
+      <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+        <strong class="text-sm sm:text-base">🏆 Card Challenges — Teacher Answer Reveal (挑戰題核對)</strong>
+        <button type="button" data-close="modalChallenges" class="min-h-[40px] min-w-[40px] rounded-lg bg-white/10 text-white font-bold">✕</button>
+      </div>
+      <div class="p-4 overflow-y-auto flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-600">Can your function give HK$25, HK$27.50 and HK$40?</span>
+          <div class="flex gap-2">
+            <button type="button" id="btnChalShowAll" class="min-h-[40px] px-3 rounded-lg bg-teal-700 text-white font-bold text-xs">Reveal All</button>
+            <button type="button" id="btnChalHideAll" class="min-h-[40px] px-3 rounded-lg border border-slate-300 bg-slate-100 text-slate-800 font-bold text-xs">Hide All</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-center text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-100">
+                <th class="border border-slate-300 p-2 font-extrabold">Card</th>
+                <th class="border border-slate-300 p-2 font-extrabold">HK$25</th>
+                <th class="border border-slate-300 p-2 font-extrabold">HK$27.50</th>
+                <th class="border border-slate-300 p-2 font-extrabold">HK$40</th>
+                <th class="border border-slate-300 p-2 font-extrabold">Reveal</th>
+              </tr>
+            </thead>
+            <tbody id="chalTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="border-2 border-amber-300 bg-amber-50 rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex-1 min-w-[220px]">
+            <div class="font-extrabold text-xs sm:text-sm text-amber-950">
+              HK$40 Budget: Largest allowed <i class="math-font">x</i> and cost (港幣40元預算最大容許 x 值)
+            </div>
+            <div id="chalBudgetText" class="hidden mt-1.5 text-xs sm:text-sm text-slate-800 leading-relaxed">
+              • <strong>Cards A &amp; B:</strong> Largest allowed <i class="math-font">x</i> = <strong>4</strong> (Cost = <strong>HK$40</strong>).<br/>
+              • <strong>Cards C &amp; D:</strong> Largest allowed <i class="math-font">x</i> = <strong>3</strong> (Cost = <strong>HK$40</strong>).<br/>
+              <span class="text-xs text-amber-900 font-semibold">Note: This personal budget does not create a permanent shop-stock limit on the domain.</span>
+            </div>
+          </div>
+          <button type="button" id="btnChalBudgetToggle" class="min-h-[40px] px-3 rounded-lg bg-amber-600 text-white font-bold text-xs">Reveal Budget</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       SCRIPT: COMPLETE INTERACTIVE SVG ENGINE (iOS Safari String Injection)
+       ===================================================================== -->
+  <script>
+  (function() {
+    "use strict";
+
+    // Pre-existing Functions from Lesson Plan & Worksheet (Clean Domain Strings — Zero Double Parentheses)
+    var FUNCTIONS_DB = {
+      A: {
+        id: "A",
+        shortName: "Card A",
+        enTitle: "Card A — Picnic candies",
+        zhTitle: "情境卡 A：購買野餐糖果",
+        htmlSym: "C<sub>A</sub>(x)",
+        varSym: "x",
+        formulaHtml: "C<sub>A</sub>(x) = 20 + 5x",
+        breakdownEn: "HK$20 bag fee (fixed) + HK$5 per 100 g",
+        domainClean: "real x ≥ 1",
+        domainNoteEn: "No maximum weight",
+        domainZh: "定義域：實數 x ≥ 1（實心起點射線，不設上限）",
+        m: 5,
+        c: 20,
+        type: "ray_closed",
+        xMinAllowed: 1,
+        color: "#0f766e",
+        sampleXs: [1, 1.5, 2, 3],
+        isAllowed: function(x) { return typeof x === "number" && isFinite(x) && x >= 1 - 1e-9; },
+        rejectReason: "Shop requires weight ≥ 100 g (real x ≥ 1)."
+      },
+      B: {
+        id: "B",
+        shortName: "Card B",
+        enTitle: "Card B — Classroom photo prints",
+        zhTitle: "情境卡 B：列印班級相片",
+        htmlSym: "C<sub>B</sub>(x)",
+        varSym: "x",
+        formulaHtml: "C<sub>B</sub>(x) = 20 + 5x",
+        breakdownEn: "HK$20 service fee (fixed) + HK$5 per photo",
+        domainClean: "x ∈ {1, 2, 3, ...}",
+        domainNoteEn: "Whole photos only",
+        domainZh: "定義域：正整數 {1, 2, 3, ...}（分開的點，不可連線）",
+        m: 5,
+        c: 20,
+        type: "dots_int",
+        xMinAllowed: 1,
+        color: "#b45309",
+        fillColor: "#fbbf24",
+        sampleXs: [1, 2, 3, 4],
+        isAllowed: function(x) { return isInt(x) && x >= 1; },
+        rejectReason: "Only whole photo prints x ∈ {1, 2, 3, ...} are sold."
+      },
+      C: {
+        id: "C",
+        shortName: "Card C",
+        enTitle: "Card C — Birthday ribbon",
+        zhTitle: "情境卡 C：購買生日絲帶",
+        htmlSym: "C<sub>C</sub>(x)",
+        varSym: "x",
+        formulaHtml: "C<sub>C</sub>(x) = 10 + 10x",
+        breakdownEn: "HK$10 cutting/packing fee + HK$10 per m",
+        domainClean: "real x > 0",
+        domainNoteEn: "Parts of a metre allowed",
+        domainZh: "定義域：實數 x > 0（(0,10) 為空心點射線，不設上限）",
+        m: 10,
+        c: 10,
+        type: "ray_open",
+        xMinAllowed: 0,
+        color: "#7c3aed",
+        sampleXs: [0.5, 1, 2, 3],
+        isAllowed: function(x) { return typeof x === "number" && isFinite(x) && x > 1e-9; },
+        rejectReason: "Ribbon length must be greater than 0 m (real x > 0)."
+      },
+      D: {
+        id: "D",
+        shortName: "Card D",
+        enTitle: "Card D — Name keychains",
+        zhTitle: "情境卡 D：訂製姓名鎖匙扣",
+        htmlSym: "C<sub>D</sub>(x)",
+        varSym: "x",
+        formulaHtml: "C<sub>D</sub>(x) = 10 + 10x",
+        breakdownEn: "HK$10 design fee (fixed) + HK$10 per keychain",
+        domainClean: "x ∈ {1, 2, 3, ...}",
+        domainNoteEn: "Whole keychains only",
+        domainZh: "定義域：正整數 {1, 2, 3, ...}（分開的點，不可連線）",
+        m: 10,
+        c: 10,
+        type: "dots_int",
+        xMinAllowed: 1,
+        color: "#be185d",
+        fillColor: "#be185d",
+        sampleXs: [1, 2, 3, 4],
+        isAllowed: function(x) { return isInt(x) && x >= 1; },
+        rejectReason: "Order at least 1 whole keychain x ∈ {1, 2, 3, ...}."
+      },
+      noodles: {
+        id: "noodles",
+        shortName: "Cart Noodles",
+        enTitle: "Cart Noodles — Classroom Model",
+        zhTitle: "車仔麵課堂模型（HK$10麵底＋每份餸$6）",
+        htmlSym: "C(x)",
+        varSym: "x",
+        formulaHtml: "C(x) = 10 + 6x",
+        breakdownEn: "HK$10 bowl (fixed charge) + HK$6 per topping (餸)",
+        domainClean: "x ∈ {0, 1, 2, 3, ...}",
+        domainNoteEn: "0 toppings allowed",
+        domainZh: "定義域：非負整數 {0, 1, 2, 3, ...}（分開的點）",
+        m: 6,
+        c: 10,
+        type: "dots_int",
+        xMinAllowed: 0,
+        color: "#059669",
+        fillColor: "#10b981",
+        sampleXs: [0, 1, 2, 3],
+        isAllowed: function(x) { return isInt(x) && x >= 0; },
+        rejectReason: "Number of toppings x must be a non-negative integer {0, 1, 2, ...}."
+      },
+      thomas: {
+        id: "thomas",
+        shortName: "DSE Thomas",
+        enTitle: "DSE Application — Thomas's Salary",
+        zhTitle: "DSE 應用題：Thomas 售賣電腦月薪",
+        htmlSym: "S(n)",
+        varSym: "n",
+        formulaHtml: "S(n) = 560n + 4800",
+        breakdownEn: "HK$4,800 base salary + HK$560 per computer sold",
+        domainClean: "n ∈ {0, 1, 2, 3, ...}",
+        domainNoteEn: "Non-negative integers",
+        domainZh: "定義域：非負整數 n ∈ {0, 1, 2, ...}（電腦數目不可為小數）",
+        m: 560,
+        c: 4800,
+        type: "dots_int",
+        xMinAllowed: 0,
+        color: "#1d4ed8",
+        fillColor: "#3b82f6",
+        sampleXs: [0, 10, 31, 32],
+        isAllowed: function(n) { return isInt(n) && n >= 0; },
+        rejectReason: "n must be a non-negative integer — S = $22,600 requires n = 445/14 ≈ 31.79, so impossible!"
+      }
+    };
+
+    var CONC_FORMULAS = {
+      noodle: { m: 6,  c: 10, expr: "y = 6x + 10", zh: "Cart-noodles formula (車仔麵線性公式)" },
+      ab:     { m: 5,  c: 20, expr: "y = 5x + 20", zh: "Cards A & B formula (情境卡 A/B 公式)" },
+      cd:     { m: 10, c: 10, expr: "y = 10x + 10", zh: "Cards C & D formula (情境卡 C/D 公式)" }
+    };
+
+    var CHALLENGE_DATA = [
+      { card: "Card A", sub: "20 + 5x, real x ≥ 1", c25: { ok: true, t: "x = 1 ✓" }, c275: { ok: true, t: "x = 1.5 ✓" }, c40: { ok: true, t: "x = 4 ✓" } },
+      { card: "Card B", sub: "20 + 5x, x ∈ {1,2,3,...}", c25: { ok: true, t: "x = 1 ✓" }, c275: { ok: false, t: "x = 1.5 ✕" }, c40: { ok: true, t: "x = 4 ✓" } },
+      { card: "Card C", sub: "10 + 10x, real x > 0", c25: { ok: true, t: "x = 1.5 ✓" }, c275: { ok: true, t: "x = 1.75 ✓" }, c40: { ok: true, t: "x = 3 ✓" } },
+      { card: "Card D", sub: "10 + 10x, x ∈ {1,2,3,...}", c25: { ok: false, t: "x = 1.5 ✕" }, c275: { ok: false, t: "x = 1.75 ✕" }, c40: { ok: true, t: "x = 3 ✓" } }
+    ];
+
+    var state = {
+      topNav: "ab",          // "ab" | "cd" | "domains" | "takeaway"
+      viewType: "cards",     // "cards" | "domains" | "thomas"
+      activeFuncs: ["A", "B"],
+
+      concFormulaKey: "noodle",
+      domReal: true,
+      domNonNegReal: false,
+      domInt: true,
+      domNonNegInt: false,
+
+      tkRevealedCount: 1,
+      tkActivePoint: 1,
+      tk1Choice: "ab",
+      tk2Choice: "noodles",
+      tk3Choice: "B",
+
+      spotlight3Rep: false,
+      x0: 1.5,
+
+      xmin: -0.6,
+      xmax: 5.6,
+      ymin: -4,
+      ymax: 55,
+      plotW: 600,
+      plotH: 380,
+
+      maximized: false,
+      writeMode: false,
+      inkTool: "pen",
+      inkColor: "#dc2626",
+      pencilOnly: false,
+      inkBuckets: {
+        cards:   { strokes: [], undo: [] },
+        domains: { strokes: [], undo: [] },
+        thomas:  { strokes: [], undo: [] }
+      },
+
+      chalRevealed: { 0: false, 1: false, 2: false, 3: false, budget: false },
+      kpBuffer: "1.5"
+    };
+
+    var plotStage = document.getElementById("graphPlotStage");
+    var graphMount = document.getElementById("graphMount");
+    var inkMount = document.getElementById("inkMount");
+    var tappablePoints = [];
+
+    function isInt(v) {
+      return typeof v === "number" && isFinite(v) && Math.abs(v - Math.round(v)) < 1e-7;
+    }
+
+    function fmt(v) {
+      if (typeof v !== "number" || !isFinite(v)) return "—";
+      if (Math.abs(v - Math.round(v)) < 1e-7) return String(Math.round(v));
+      return Number(v.toFixed(2)).toString();
+    }
+
+    function escXml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function resetCamera() {
+      if (state.viewType === "thomas") {
+        // Default zoomed nicely near n=29..34 when opened from Take-away 2, or full 0..36 view
+        state.xmin = 28.5;
+        state.xmax = 34.5;
+        state.ymin = 20800;
+        state.ymax = 23800;
+      } else if (state.viewType === "domains") {
+        var cf = CONC_FORMULAS[state.concFormulaKey];
+        state.xmin = -3.6;
+        state.xmax = 5.6;
+        state.ymin = Math.min(-15, cf.m * (-3.2) + cf.c - 5);
+        state.ymax = Math.max(46, cf.m * 4.6 + cf.c + 6);
+      } else {
+        state.xmin = -0.6;
+        state.xmax = 5.6;
+        state.ymin = -4;
+        state.ymax = 55;
+      }
+    }
+
+    function toPxX(x) {
+      return ((x - state.xmin) / (state.xmax - state.xmin)) * state.plotW;
+    }
+    function toPxY(y) {
+      return state.plotH - ((y - state.ymin) / (state.ymax - state.ymin)) * state.plotH;
+    }
+    function toMathX(px) {
+      return state.xmin + (px / state.plotW) * (state.xmax - state.xmin);
+    }
+    function toMathY(py) {
+      return state.ymin + ((state.plotH - py) / state.plotH) * (state.ymax - state.ymin);
+    }
+
+    function niceStep(span, targetTicks) {
+      var raw = Math.max(1e-6, span / targetTicks);
+      var pow10 = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+      var norm = raw / pow10;
+      var mult = norm >= 5 ? 5 : (norm >= 2 ? 2 : 1);
+      return mult * pow10;
+    }
+
+    // =====================================================================
+    // Apply ★ Key Take-away Visual Presets Using Pre-Existing Functions
+    // =====================================================================
+    function applyTakeawayPreset() {
+      if (state.tkActivePoint === 1) {
+        state.spotlight3Rep = false;
+        if (state.tk1Choice === "ab") {
+          state.viewType = "cards";
+          state.activeFuncs = ["A", "B"];
+          state.x0 = 1.5;
+        } else if (state.tk1Choice === "cd") {
+          state.viewType = "cards";
+          state.activeFuncs = ["C", "D"];
+          state.x0 = 1.5;
+        } else {
+          state.viewType = "domains";
+          state.concFormulaKey = "noodle";
+          state.domReal = true;
+          state.domNonNegReal = false;
+          state.domInt = true;
+          state.domNonNegInt = false;
+          state.x0 = -1.5;
+        }
+      } else if (state.tkActivePoint === 2) {
+        state.spotlight3Rep = false;
+        if (state.tk2Choice === "noodles") {
+          state.viewType = "cards";
+          state.activeFuncs = ["noodles"];
+          state.x0 = 3;
+        } else if (state.tk2Choice === "abcd") {
+          state.viewType = "cards";
+          state.activeFuncs = ["A", "B", "C", "D"];
+          state.x0 = 2;
+        } else {
+          state.viewType = "thomas";
+          state.x0 = 445 / 14;
+        }
+      } else if (state.tkActivePoint === 3) {
+        state.viewType = "cards";
+        state.activeFuncs = [state.tk3Choice];
+        state.spotlight3Rep = true;
+        var fn = FUNCTIONS_DB[state.tk3Choice];
+        state.x0 = fn ? fn.sampleXs[1] : 2;
+      }
+      resetCamera();
+    }
+
+    // =====================================================================
+    // Sync Top Bars, Context Strips & Spotlight Rings
+    // =====================================================================
+    function syncChrome() {
+      var navs = [
+        ["navAB", state.topNav === "ab", "bg-white text-slate-900 border-white shadow-sm", "bg-white/10 text-slate-100 border-white/20 hover:bg-white/20"],
+        ["navCD", state.topNav === "cd", "bg-white text-slate-900 border-white shadow-sm", "bg-white/10 text-slate-100 border-white/20 hover:bg-white/20"],
+        ["navDomains", state.topNav === "domains", "bg-amber-500 text-white border-amber-300 shadow-sm", "bg-amber-100 text-amber-950 border-amber-400 hover:bg-amber-200"],
+        ["navTakeaway", state.topNav === "takeaway", "bg-amber-400 text-slate-950 border-amber-200 shadow-md", "bg-indigo-600 text-white border-indigo-400 hover:bg-indigo-500"]
+      ];
+      navs.forEach(function(n) {
+        document.getElementById(n[0]).className =
+          "min-h-[44px] px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center gap-1.5 transition border " + (n[1] ? n[2] : n[3]);
+      });
+
+      document.getElementById("stripCards").style.display = (state.topNav === "ab" || state.topNav === "cd") ? "flex" : "none";
+      document.getElementById("stripDomains").style.display = (state.topNav === "domains") ? "flex" : "none";
+      document.getElementById("stripTakeaway").style.display = (state.topNav === "takeaway") ? "flex" : "none";
+
+      var cardPills = [
+        ["chkA", "pillA", "A", "border-2 border-teal-700 bg-teal-50/70"],
+        ["chkB", "pillB", "B", "border-2 border-amber-600 bg-amber-50/70"],
+        ["chkC", "pillC", "C", "border-2 border-purple-600 bg-purple-50/70"],
+        ["chkD", "pillD", "D", "border-2 border-pink-700 bg-pink-50/70"],
+        ["chkNoodles", "pillNoodles", "noodles", "border-2 border-emerald-600 bg-emerald-50/70"]
+      ];
+      cardPills.forEach(function(p) {
+        var on = state.activeFuncs.indexOf(p[2]) !== -1;
+        document.getElementById(p[0]).checked = on;
+        document.getElementById(p[1]).className =
+          "min-h-[40px] px-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold " +
+          (on ? p[3] : "border border-slate-300 bg-white");
+      });
+
+      document.querySelectorAll(".cformula-btn").forEach(function(b) {
+        var on = b.getAttribute("data-cformula") === state.concFormulaKey;
+        b.className = "cformula-btn min-h-[40px] px-2.5 rounded-lg font-extrabold text-xs " +
+          (on ? "border-2 border-amber-800 bg-amber-700 text-white" : "border border-amber-600 bg-white text-amber-950");
+      });
+
+      var domPills = [
+        ["chkDomReal", "pillDomReal", state.domReal, "border-2 border-blue-600 bg-white"],
+        ["chkDomNonNegReal", "pillDomNonNegReal", state.domNonNegReal, "border-2 border-emerald-600 bg-white"],
+        ["chkDomInt", "pillDomInt", state.domInt, "border-2 border-red-600 bg-white"],
+        ["chkDomNonNegInt", "pillDomNonNegInt", state.domNonNegInt, "border-2 border-purple-600 bg-white"]
+      ];
+      domPills.forEach(function(d) {
+        document.getElementById(d[0]).checked = d[2];
+        document.getElementById(d[1]).className =
+          "min-h-[40px] px-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold " +
+          (d[2] ? d[3] : "border border-slate-300 bg-white/80");
+      });
+
+      // Key Take-away Cards
+      document.getElementById("tkProgressLabel").textContent = "Revealed: " + state.tkRevealedCount + " / 3";
+      document.getElementById("btnRevealNextTk").disabled = state.tkRevealedCount >= 3;
+      document.getElementById("btnRevealNextTk").style.opacity = state.tkRevealedCount >= 3 ? "0.45" : "1";
+
+      document.getElementById("tkLocked2").style.display = state.tkRevealedCount >= 2 ? "none" : "flex";
+      document.getElementById("tkCard2").style.display = state.tkRevealedCount >= 2 ? "flex" : "none";
+      document.getElementById("tkLocked3").style.display = state.tkRevealedCount >= 3 ? "none" : "flex";
+      document.getElementById("tkCard3").style.display = state.tkRevealedCount >= 3 ? "flex" : "none";
+
+      [1, 2, 3].forEach(function(idx) {
+        var el = document.getElementById("tkCard" + idx);
+        var active = state.topNav === "takeaway" && state.tkActivePoint === idx;
+        el.className = (idx > 1 && state.tkRevealedCount < idx ? "hidden " : "flex ") +
+          "h-full rounded-xl p-2.5 cursor-pointer transition flex-col justify-between gap-2 " +
+          (active ? "border-2 border-amber-400 bg-indigo-900 shadow-md" : "border border-indigo-700 bg-indigo-900/50 hover:bg-indigo-900/75");
+      });
+
+      document.querySelectorAll("[data-tk1]").forEach(function(b) {
+        var on = state.tkActivePoint === 1 && b.getAttribute("data-tk1") === state.tk1Choice;
+        b.className = "min-h-[34px] px-2 rounded-md text-[11.5px] " + (on ? "font-extrabold bg-amber-400 text-slate-950" : "font-bold bg-indigo-800 text-indigo-100");
+      });
+      document.querySelectorAll("[data-tk2]").forEach(function(b) {
+        var on = state.tkActivePoint === 2 && b.getAttribute("data-tk2") === state.tk2Choice;
+        b.className = "min-h-[34px] px-2 rounded-md text-[11.5px] " + (on ? "font-extrabold bg-amber-400 text-slate-950" : "font-bold bg-indigo-800 text-indigo-100");
+      });
+      document.querySelectorAll("[data-tk3]").forEach(function(b) {
+        var on = state.tkActivePoint === 3 && b.getAttribute("data-tk3") === state.tk3Choice;
+        b.className = "min-h-[34px] px-2 rounded-md text-[11.5px] " + (on ? "font-extrabold bg-amber-400 text-slate-950" : "font-bold bg-indigo-800 text-indigo-100");
+      });
+
+      // 3-Representation Spotlight Rings
+      document.getElementById("panelAlgebraic").classList.toggle("spot-ring-1", state.spotlight3Rep);
+      document.getElementById("panelTabular").classList.toggle("spot-ring-2", state.spotlight3Rep);
+      document.getElementById("panelGraphical").classList.toggle("spot-ring-3", state.spotlight3Rep);
+
+      document.getElementById("badge1").className = "inline-flex items-center justify-center w-6 h-6 rounded-md text-white text-xs font-black " + (state.spotlight3Rep ? "bg-blue-600" : "bg-slate-800");
+      document.getElementById("badge2").className = "inline-flex items-center justify-center w-6 h-6 rounded-md text-white text-xs font-black " + (state.spotlight3Rep ? "bg-amber-600" : "bg-slate-800");
+      document.getElementById("badge3").className = "inline-flex items-center justify-center w-6 h-6 rounded-md text-white text-xs font-black " + (state.spotlight3Rep ? "bg-teal-700" : "bg-slate-800");
+
+      var lblBtn = document.getElementById("btnToggleLabels");
+      lblBtn.textContent = state.spotlight3Rep ? "Point Labels: ON ★" : "Point Labels: OFF";
+      lblBtn.className = "min-h-[38px] px-2.5 rounded-lg border text-xs font-bold " +
+        (state.spotlight3Rep ? "border-teal-700 bg-teal-50 text-teal-900" : "border-slate-300 bg-white text-slate-800");
+
+      // Footer Banner Mode Sync: Collaborative Task Card vs Domain/Thomas Takeaway
+      var showCollabFooter = (state.viewType === "cards");
+      document.getElementById("footerCollabContent").style.display = showCollabFooter ? "flex" : "none";
+      document.getElementById("footerOtherContent").style.display = showCollabFooter ? "none" : "block";
+      if (!showCollabFooter) {
+        if (state.viewType === "thomas") {
+          document.getElementById("footerEn").textContent = "DSE Check: Always verify whether the required input n belongs to the domain (non-negative integers).";
+          document.getElementById("footerZh").textContent = "(DSE 檢查重點：必須檢查求出的輸入值 n 是否屬於定義域（非負整數）。)";
+        } else {
+          document.getElementById("footerEn").textContent = "Conclusion: On the same linear formula, the domain decides whether the graph is a line, a ray, or separate points.";
+          document.getElementById("footerZh").textContent = "(總結：在同一線性公式下，定義域決定圖像是一條直線、射線，還是分開的點。)";
+        }
+      }
+    }
+
+    // =====================================================================
+    // Render Algebraic Panel, Tabular Panel & Clean Legend Strip
+    // =====================================================================
+    function renderPanelsAndLegend() {
+      var x = state.x0;
+      var hasX = typeof x === "number" && isFinite(x);
+      var isThomas = state.viewType === "thomas";
+      var vSym = isThomas ? "n" : "x";
+
+      document.getElementById("varSymText").textContent = vSym;
+      document.getElementById("tblVarSym").textContent = vSym;
+      document.getElementById("tryInputHeading").innerHTML =
+        'Try Input <i class="math-font">' + vSym + '</i> <span class="font-semibold text-slate-600">(測試輸入值)</span>';
+
+      var dispX = hasX ? (Math.abs(x - 445 / 14) < 1e-3 ? "31.79 (445/14)" : fmt(x)) : "—";
+      document.getElementById("valSymText").textContent = dispX;
+      document.getElementById("tblXVal").textContent = hasX ? fmt(x) : "—";
+      document.getElementById("kpThomasBtnWrap").style.display = isThomas ? "block" : "none";
+
+      // Quick Test Chips
+      var chipVals = isThomas
+        ? [0, 10, 31, 31.7857, 32]
+        : (state.viewType === "domains" ? [-2, -1.5, 0, 0.5, 1, 1.5, 3] : [0, 0.5, 1, 1.5, 2, 3, 4]);
+
+      var chipsHtml = chipVals.map(function(cv) {
+        var is22600 = Math.abs(cv - 31.7857) < 1e-3;
+        var actual = is22600 ? (445 / 14) : cv;
+        var selected = hasX && Math.abs(actual - x) < 1e-3;
+        var label = is22600 ? "31.79 ($22,600)" : String(cv).replace("-", "−");
+        return '<button type="button" data-chip="' + actual + '" class="min-h-[34px] px-2.5 rounded-lg border text-xs font-extrabold transition ' +
+          (selected ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100') + '">' + label + '</button>';
+      }).join("");
+
+      if (isThomas) {
+        chipsHtml += '<button type="button" id="btnThomasFullRange" class="min-h-[34px] px-2 rounded-lg border border-blue-400 bg-blue-50 text-blue-900 text-xs font-bold">Full 0..36</button>';
+        chipsHtml += '<button type="button" id="btnThomasZoomGap" class="min-h-[34px] px-2 rounded-lg border border-blue-400 bg-blue-50 text-blue-900 text-xs font-bold">Zoom n=29..34</button>';
+      }
+      document.getElementById("quickChipsMount").innerHTML = chipsHtml;
+
+      document.querySelectorAll("[data-chip]").forEach(function(b) {
+        b.addEventListener("click", function() {
+          state.x0 = Number(b.getAttribute("data-chip"));
+          renderPanelsAndLegend();
+          renderGraphSvg();
+        });
+      });
+
+      var btnFull = document.getElementById("btnThomasFullRange");
+      if (btnFull) {
+        btnFull.addEventListener("click", function() {
+          state.xmin = -2; state.xmax = 38; state.ymin = -1500; state.ymax = 27000;
+          renderGraphSvg();
+        });
+      }
+      var btnGap = document.getElementById("btnThomasZoomGap");
+      if (btnGap) {
+        btnGap.addEventListener("click", function() {
+          state.xmin = 28.5; state.xmax = 34.5; state.ymin = 20800; state.ymax = 23800;
+          renderGraphSvg();
+        });
+      }
+
+      var algEl = document.getElementById("algebraicCardsMount");
+      var verdEl = document.getElementById("verdictsMount");
+      var tblEl = document.getElementById("tableMount");
+      var legEl = document.getElementById("graphLegendStrip");
+
+      if (state.viewType === "cards" || state.viewType === "thomas") {
+        var ids = isThomas ? ["thomas"] : state.activeFuncs;
+        var algHtml = [];
+        var verdHtml = [];
+        var legHtml = [];
+
+        ids.forEach(function(fid) {
+          var fn = FUNCTIONS_DB[fid];
+          if (!fn) return;
+
+          var spotSub = "";
+          if (state.spotlight3Rep && ids.length === 1) {
+            spotSub = '<div class="mt-1.5 pt-1.5 border-t border-blue-200 bg-blue-50/80 rounded px-2 py-1 text-[11.5px] font-bold text-blue-950">' +
+              '① Substitutions: ' +
+              fn.sampleXs.slice(0, 3).map(function(sx) { return fn.htmlSym.replace("(x)", "(" + sx + ")").replace("(n)", "(" + sx + ")") + "=" + fmt(fn.c + fn.m * sx); }).join(", ") +
+              '</div>';
+          }
+
+          algHtml.push(
+            '<div class="rounded-xl border border-slate-200 border-l-[6px] p-2.5 bg-slate-50/70" style="border-left-color:' + fn.color + ';">' +
+              '<div class="text-xs font-extrabold" style="color:' + fn.color + ';">' + fn.enTitle + '</div>' +
+              '<div class="text-[11px] font-semibold text-slate-500">' + fn.zhTitle + '</div>' +
+              '<div class="math-font text-xl font-bold text-slate-900 my-0.5">' + fn.formulaHtml + '</div>' +
+              '<div class="text-xs text-slate-700 font-medium">' + fn.breakdownEn + '</div>' +
+              '<div class="mt-1 inline-block bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-extrabold text-slate-900">' +
+                'Domain: ' + fn.domainClean + ' <span class="font-medium text-slate-500">· ' + fn.domainNoteEn + '</span>' +
+              '</div>' +
+              '<div class="text-[11px] text-slate-600 mt-0.5">' + fn.domainZh + '</div>' +
+              spotSub +
+            '</div>'
+          );
+
+          // Clean single-level legend text (NO double parentheses!)
+          var sym = fn.type === "ray_open" ? "○" : "●";
+          legHtml.push(
+            '<span class="inline-flex items-center gap-1">' +
+              '<strong style="color:' + fn.color + ';">' + sym + ' ' + fn.shortName + ':</strong> ' +
+              '<span class="font-semibold text-slate-800">' + fn.formulaHtml + ', ' + fn.domainClean + '</span>' +
+            '</span>'
+          );
+
+          if (hasX) {
+            var rawVal = fn.c + fn.m * x;
+            if (fn.isAllowed(x)) {
+              verdHtml.push('<div class="bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5"><strong>' + fn.shortName + ':</strong> <span class="text-emerald-700 font-extrabold">✓ Allowed → HK$' + fmt(rawVal) + '</span></div>');
+            } else {
+              verdHtml.push(
+                '<div class="bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">' +
+                  '<strong>' + fn.shortName + ':</strong> <span class="text-red-700 font-extrabold">✕ Not in domain (不在定義域內)</span>' +
+                  '<span class="block text-[11px] text-slate-600 mt-0.5">Formula gives ' + fmt(rawVal) + ', but: ' + fn.rejectReason + '</span>' +
+                '</div>'
+              );
+            }
+          }
+        });
+
+        algEl.innerHTML = algHtml.length ? algHtml.join("") : '<div class="text-xs text-slate-500 p-2">Tick at least one card above.</div>';
+        verdEl.innerHTML = verdHtml.join("");
+        legEl.innerHTML = legHtml.length ? legHtml.join("") : '<span class="text-slate-500">Tick a card above to plot its graph.</span>';
+
+        // Tabular Panel
+        if (!ids.length) {
+          tblEl.innerHTML = '<div class="text-xs text-slate-500 p-2">Tick a card above to view its table.</div>';
+        } else {
+          var rows = isThomas
+            ? [0, 10, 20, 31, 32]
+            : (ids.length === 1 && ids[0] === "noodles" ? [0, 1, 2, 3, 4] : [0, 0.5, 1, 1.5, 2, 3, 4]);
+
+          if (hasX && !rows.some(function(r) { return Math.abs(r - x) < 1e-4; })) {
+            rows.push(x);
+            rows.sort(function(a, b) { return a - b; });
+          }
+
+          var spotXs = (state.spotlight3Rep && ids.length === 1) ? FUNCTIONS_DB[ids[0]].sampleXs : [];
+
+          var thead = '<th class="border border-slate-300 bg-slate-100 p-2 font-extrabold math-font">' + vSym + '</th>' +
+            ids.map(function(fid) {
+              var fn = FUNCTIONS_DB[fid];
+              return '<th class="border border-slate-300 bg-slate-100 p-2 font-extrabold text-xs" style="color:' + fn.color + ';">' +
+                fn.htmlSym + '<span class="block text-[10px] font-semibold text-slate-500">' + fn.domainClean + '</span></th>';
+            }).join("");
+
+          var tbody = rows.map(function(rv) {
+            var isT = hasX && Math.abs(rv - x) < 1e-4;
+            var isSpot = spotXs.some(function(sx) { return Math.abs(sx - rv) < 1e-4; });
+            var cls = isT ? "bg-amber-100 font-extrabold" : (isSpot ? "bg-amber-50/70" : "hover:bg-slate-50");
+            var rLabel = Math.abs(rv - 445 / 14) < 1e-3 ? "31.79" : fmt(rv);
+
+            var cells = ids.map(function(fid) {
+              var fn = FUNCTIONS_DB[fid];
+              if (fn.isAllowed(rv)) {
+                var yv = fmt(fn.c + fn.m * rv);
+                var spotTag = isSpot ? ' <span class="inline-block px-1 rounded bg-amber-600 text-white text-[10px]">(' + rLabel + ',' + yv + ')</span>' : '';
+                return '<td class="border border-slate-300 p-2 text-emerald-800 font-extrabold">' + yv + spotTag + '</td>';
+              }
+              return '<td class="border border-slate-300 p-2 bg-red-50 text-red-700 font-extrabold text-xs">✕</td>';
+            }).join("");
+
+            return '<tr data-rowx="' + rv + '" class="cursor-pointer transition ' + cls + '">' +
+              '<td class="border border-slate-300 p-2 font-bold math-font">' + rLabel + (isT ? ' ★' : '') + '</td>' + cells + '</tr>';
+          }).join("");
+
+          tbody += '<tr class="bg-slate-50 text-slate-600 text-xs font-bold"><td class="border border-slate-300 p-1.5">⋮</td>' +
+            '<td colspan="' + ids.length + '" class="border border-slate-300 p-1.5">Continues without upper bound (無限延伸)</td></tr>';
+
+          tblEl.innerHTML = '<table class="w-full border-collapse text-center text-xs sm:text-sm"><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table>';
+        }
+
+      } else {
+        // CONCLUSION: COMPARE DOMAINS
+        var cf = CONC_FORMULAS[state.concFormulaKey];
+        var dCards = [
+          '<div class="rounded-xl border-2 border-amber-400 bg-amber-50/70 p-2.5">' +
+            '<div class="text-xs font-extrabold text-amber-900">Same Formula (同一公式)</div>' +
+            '<div class="math-font text-2xl font-bold text-slate-900 my-0.5">' + cf.expr + '</div>' +
+            '<div class="text-xs text-amber-950 font-semibold">' + cf.zh + '</div>' +
+          '</div>'
+        ];
+        var dLeg = ['<strong class="text-amber-900">' + cf.expr + ':</strong>'];
+
+        if (state.domReal) {
+          dCards.push('<div class="rounded-xl border border-slate-200 border-l-[6px] border-l-blue-600 p-2 bg-slate-50"><div class="text-xs font-extrabold text-blue-700">● All real numbers ℝ (所有實數)</div><div class="text-[11px] text-slate-600">Full straight line, arrows at both ends</div></div>');
+          dLeg.push('<span class="text-blue-700 font-extrabold">● ℝ: Full line</span>');
+        }
+        if (state.domNonNegReal) {
+          dCards.push('<div class="rounded-xl border border-slate-200 border-l-[6px] border-l-emerald-600 p-2 bg-slate-50"><div class="text-xs font-extrabold text-emerald-700">● Non-negative real x ≥ 0 (非負實數)</div><div class="text-[11px] text-slate-600">Ray starting from solid point (0, ' + cf.c + ')</div></div>');
+          dLeg.push('<span class="text-emerald-700 font-extrabold">● x ≥ 0: Ray from (0,' + cf.c + ')</span>');
+        }
+        if (state.domInt) {
+          dCards.push('<div class="rounded-xl border border-slate-200 border-l-[6px] border-l-red-600 p-2 bg-slate-50"><div class="text-xs font-extrabold text-red-700">● All integers ℤ (所有整數)</div><div class="text-[11px] text-slate-600">Separate dots {..., −2, −1, 0, 1, 2, ...}</div></div>');
+          dLeg.push('<span class="text-red-700 font-extrabold">● ℤ: Integer dots</span>');
+        }
+        if (state.domNonNegInt) {
+          dCards.push('<div class="rounded-xl border border-slate-200 border-l-[6px] border-l-purple-600 p-2 bg-slate-50"><div class="text-xs font-extrabold text-purple-700">● Non-neg integers {0, 1, 2, ...} (非負整數)</div><div class="text-[11px] text-slate-600">Separate dots from x = 0 rightward</div></div>');
+          dLeg.push('<span class="text-purple-700 font-extrabold">● {0,1,2,...}: Non-neg integer dots</span>');
+        }
+
+        algEl.innerHTML = dCards.join("");
+        legEl.innerHTML = dLeg.join(" ");
+
+        if (hasX) {
+          var yVal = fmt(cf.m * x + cf.c);
+          verdEl.innerHTML =
+            '<div class="bg-white border border-slate-200 rounded-lg px-2.5 py-2 leading-relaxed">' +
+              '<div class="font-bold text-slate-900 mb-0.5">' + cf.m + '(' + fmt(x) + ') + ' + cf.c + ' = <strong>' + yVal + '</strong></div>' +
+              '<div>• ℝ: <span class="text-emerald-700 font-extrabold">✓ Allowed</span> · x ≥ 0: ' + (x >= -1e-9 ? '<span class="text-emerald-700 font-extrabold">✓</span>' : '<span class="text-red-700 font-bold">✕</span>') + '</div>' +
+              '<div>• ℤ: ' + (isInt(x) ? '<span class="text-emerald-700 font-extrabold">✓ Allowed</span>' : '<span class="text-red-700 font-bold">✕</span>') + ' · {0,1,2,...}: ' + ((x >= -1e-9 && isInt(x)) ? '<span class="text-emerald-700 font-extrabold">✓</span>' : '<span class="text-red-700 font-bold">✕</span>') + '</div>' +
+            '</div>';
+        }
+
+        var cols = [];
+        if (state.domReal) cols.push({ h: "ℝ", ok: function() { return true; } });
+        if (state.domNonNegReal) cols.push({ h: "x ≥ 0", ok: function(v) { return v >= -1e-9; } });
+        if (state.domInt) cols.push({ h: "ℤ", ok: function(v) { return isInt(v); } });
+        if (state.domNonNegInt) cols.push({ h: "{0,1,2,...}", ok: function(v) { return v >= -1e-9 && isInt(v); } });
+
+        if (!cols.length) {
+          tblEl.innerHTML = '<div class="text-xs text-slate-500 p-2">Tick at least one domain above.</div>';
+        } else {
+          var dXs = [-2, -1.5, -1, 0, 1, 1.5, 2, 3];
+          if (hasX && !dXs.some(function(r) { return Math.abs(r - x) < 1e-4; })) {
+            dXs.push(x);
+            dXs.sort(function(a, b) { return a - b; });
+          }
+          var dHead = '<th class="border border-slate-300 bg-slate-100 p-2 font-extrabold math-font">x</th>' +
+            cols.map(function(c) { return '<th class="border border-slate-300 bg-slate-100 p-2 font-extrabold text-xs">' + c.h + '</th>'; }).join("");
+
+          var dBody = '<tr class="bg-slate-50 text-slate-500 text-[11px] font-bold"><td class="border border-slate-300 p-1">⋮</td><td colspan="' + cols.length + '" class="border border-slate-300 p-1">Negative values continue (負數延伸)</td></tr>';
+          dBody += dXs.map(function(rv) {
+            var isT = hasX && Math.abs(rv - x) < 1e-4;
+            var outY = fmt(cf.m * rv + cf.c);
+            var tds = cols.map(function(c) {
+              return c.ok(rv)
+                ? '<td class="border border-slate-300 p-2 text-emerald-800 font-extrabold">' + outY + '</td>'
+                : '<td class="border border-slate-300 p-2 bg-red-50 text-red-700 font-extrabold text-xs">✕</td>';
+            }).join("");
+            return '<tr data-rowx="' + rv + '" class="cursor-pointer transition ' + (isT ? 'bg-amber-100 font-extrabold' : 'hover:bg-slate-50') + '">' +
+              '<td class="border border-slate-300 p-2 font-bold math-font">' + fmt(rv) + (isT ? ' ★' : '') + '</td>' + tds + '</tr>';
+          }).join("");
+          dBody += '<tr class="bg-slate-50 text-slate-500 text-[11px] font-bold"><td class="border border-slate-300 p-1">⋮</td><td colspan="' + cols.length + '" class="border border-slate-300 p-1">Positive values continue (正數延伸)</td></tr>';
+          tblEl.innerHTML = '<table class="w-full border-collapse text-center text-xs sm:text-sm"><thead><tr>' + dHead + '</tr></thead><tbody>' + dBody + '</tbody></table>';
+        }
+      }
+
+      document.querySelectorAll("[data-rowx]").forEach(function(tr) {
+        tr.addEventListener("click", function() {
+          state.x0 = Number(tr.getAttribute("data-rowx"));
+          renderPanelsAndLegend();
+          renderGraphSvg();
+        });
+      });
+    }
+
+    // =====================================================================
+    // iOS WebKit Safe Complete <svg> String Injection into #graphMount
+    // =====================================================================
+    function buildLineOrRaySvg(xStart, dir, m, c, color, strokeW, opacity) {
+      var xLo = dir > 0 ? Math.max(xStart, state.xmin) : state.xmin;
+      var xHi = state.xmax;
+      if (xLo > xHi) return "";
+
+      if (Math.abs(m) > 1e-9) {
+        var xAtYmin = (state.ymin - c) / m;
+        var xAtYmax = (state.ymax - c) / m;
+        xLo = Math.max(xLo, Math.min(xAtYmin, xAtYmax));
+        xHi = Math.min(xHi, Math.max(xAtYmin, xAtYmax));
+      }
+      if (xLo >= xHi) return "";
+
+      var px1 = toPxX(xLo), py1 = toPxY(m * xLo + c);
+      var px2 = toPxX(xHi), py2 = toPxY(m * xHi + c);
+      var op = opacity || 1;
+
+      var out = '<line x1="' + px1.toFixed(1) + '" y1="' + py1.toFixed(1) + '" x2="' + px2.toFixed(1) + '" y2="' + py2.toFixed(1) +
+        '" stroke="' + color + '" stroke-width="' + strokeW + '" stroke-linecap="round" opacity="' + op + '" />';
+
+      var segLen = Math.hypot(px2 - px1, py2 - py1);
+      if (segLen >= 24) {
+        var makeArrow = function(tipX, tipY, fromX, fromY) {
+          var ang = Math.atan2(tipY - fromY, tipX - fromX);
+          var tx = tipX - 4 * Math.cos(ang);
+          var ty = tipY - 4 * Math.sin(ang);
+          var L = 13;
+          var p1 = (tx - L * Math.cos(ang - 0.42)).toFixed(1) + "," + (ty - L * Math.sin(ang - 0.42)).toFixed(1);
+          var p2 = (tx - L * Math.cos(ang + 0.42)).toFixed(1) + "," + (ty - L * Math.sin(ang + 0.42)).toFixed(1);
+          return '<polygon points="' + tx.toFixed(1) + ',' + ty.toFixed(1) + ' ' + p1 + ' ' + p2 + '" fill="' + color + '" opacity="' + op + '" />';
+        };
+        out += makeArrow(px2, py2, px1, py1);
+        if (dir === 0) out += makeArrow(px1, py1, px2, py2);
+      }
+      return out;
+    }
+
+    function renderGraphSvg() {
+      var rect = graphMount.getBoundingClientRect();
+      var W = rect.width > 20 ? Math.round(rect.width) : 600;
+      var H = rect.height > 20 ? Math.round(rect.height) : 380;
+      state.plotW = W;
+      state.plotH = H;
+      tappablePoints = [];
+
+      var parts = [];
+      parts.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;width:100%;height:100%;touch-action:none;">');
+      parts.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#ffffff" />');
+
+      var xSpan = state.xmax - state.xmin;
+      var ySpan = state.ymax - state.ymin;
+      var xMaj = niceStep(xSpan, W < 440 ? 5 : 7);
+      var xMin = xMaj / 2;
+      var yMaj = niceStep(ySpan, H < 340 ? 5 : 7);
+      var yMin = yMaj / 2;
+
+      // Minor Grid
+      var minorD = [];
+      for (var gx = Math.ceil(state.xmin / xMin) * xMin; gx <= state.xmax + 1e-9; gx += xMin) {
+        minorD.push("M" + toPxX(gx).toFixed(1) + ",0V" + H);
+      }
+      for (var gy = Math.ceil(state.ymin / yMin) * yMin; gy <= state.ymax + 1e-9; gy += yMin) {
+        minorD.push("M0," + toPxY(gy).toFixed(1) + "H" + W);
+      }
+      parts.push('<path d="' + minorD.join("") + '" stroke="#f1f5f9" stroke-width="1" fill="none" />');
+
+      // Major Grid
+      var majorD = [];
+      for (var gx2 = Math.ceil(state.xmin / xMaj) * xMaj; gx2 <= state.xmax + 1e-9; gx2 += xMaj) {
+        majorD.push("M" + toPxX(gx2).toFixed(1) + ",0V" + H);
+      }
+      for (var gy2 = Math.ceil(state.ymin / yMaj) * yMaj; gy2 <= state.ymax + 1e-9; gy2 += yMaj) {
+        majorD.push("M0," + toPxY(gy2).toFixed(1) + "H" + W);
+      }
+      parts.push('<path d="' + majorD.join("") + '" stroke="#e2e8f0" stroke-width="1.25" fill="none" />');
+
+      // Axes & Tick Numbers
+      var ox = toPxX(0);
+      var oy = toPxY(0);
+      var lblY = Math.max(20, Math.min(H - 22, oy));
+      var lblX = Math.max(44, Math.min(W - 18, ox));
+
+      if (oy >= -2 && oy <= H + 2) {
+        parts.push('<line x1="0" y1="' + oy.toFixed(1) + '" x2="' + W + '" y2="' + oy.toFixed(1) + '" stroke="#1e293b" stroke-width="2" />');
+      }
+      if (ox >= -2 && ox <= W + 2) {
+        parts.push('<line x1="' + ox.toFixed(1) + '" y1="0" x2="' + ox.toFixed(1) + '" y2="' + H + '" stroke="#1e293b" stroke-width="2" />');
+      }
+
+      for (var tx = Math.ceil(state.xmin / xMaj) * xMaj; tx <= state.xmax + 1e-9; tx += xMaj) {
+        if (Math.abs(tx) < 1e-7) continue;
+        var px = toPxX(tx);
+        if (px < 22 || px > W - 24) continue;
+        if (oy >= 0 && oy <= H) {
+          parts.push('<line x1="' + px.toFixed(1) + '" y1="' + (oy - 4).toFixed(1) + '" x2="' + px.toFixed(1) + '" y2="' + (oy + 4).toFixed(1) + '" stroke="#1e293b" stroke-width="1.6" />');
+        }
+        parts.push('<text x="' + px.toFixed(1) + '" y="' + (lblY + 16).toFixed(1) + '" text-anchor="middle" fill="#334155" font-size="12.5" font-weight="700">' + escXml(fmt(tx)) + '</text>');
+      }
+
+      for (var ty = Math.ceil(state.ymin / yMaj) * yMaj; ty <= state.ymax + 1e-9; ty += yMaj) {
+        if (Math.abs(ty) < 1e-7) continue;
+        var py = toPxY(ty);
+        if (py < 22 || py > H - 18) continue;
+        if (ox >= 0 && ox <= W) {
+          parts.push('<line x1="' + (ox - 4).toFixed(1) + '" y1="' + py.toFixed(1) + '" x2="' + (ox + 4).toFixed(1) + '" y2="' + py.toFixed(1) + '" stroke="#1e293b" stroke-width="1.6" />');
+        }
+        parts.push('<text x="' + (lblX - 7).toFixed(1) + '" y="' + (py + 4).toFixed(1) + '" text-anchor="end" fill="#334155" font-size="12" font-weight="700">' + escXml(fmt(ty)) + '</text>');
+      }
+
+      if (ox > 20 && ox < W - 20 && oy > 16 && oy < H - 16) {
+        parts.push('<text x="' + (ox - 6).toFixed(1) + '" y="' + (oy + 15).toFixed(1) + '" text-anchor="end" fill="#334155" font-size="12" font-weight="700">0</text>');
+      }
+
+      var isThomas = state.viewType === "thomas";
+      parts.push('<text x="' + (W - 10).toFixed(1) + '" y="' + (lblY - 8).toFixed(1) + '" text-anchor="end" fill="#0f172a" font-size="13" font-weight="800">' +
+        (isThomas ? "n (computers) →" : "x (input) →") + '</text>');
+      parts.push('<text x="' + (lblX + 8).toFixed(1) + '" y="18" text-anchor="start" fill="#0f172a" font-size="13" font-weight="800">' +
+        (isThomas ? "↑ S(n) (HK$)" : (state.viewType === "domains" ? "↑ y (output)" : "↑ Cost C(x) (HK$)")) + '</text>');
+
+      // Dashed vertical line for tested x0
+      var x = state.x0;
+      var hasX = typeof x === "number" && isFinite(x);
+      if (hasX && x >= state.xmin && x <= state.xmax) {
+        var xLine = toPxX(x).toFixed(1);
+        parts.push('<line x1="' + xLine + '" y1="0" x2="' + xLine + '" y2="' + H + '" stroke="#d97706" stroke-width="1.6" stroke-dasharray="6,5" opacity="0.65" />');
+      }
+
+      // Thomas Target Salary Line S = 22600
+      if (isThomas && 22600 >= state.ymin && 22600 <= state.ymax) {
+        var pyTarget = toPxY(22600).toFixed(1);
+        parts.push('<line x1="0" y1="' + pyTarget + '" x2="' + W + '" y2="' + pyTarget + '" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="7,5" opacity="0.85" />');
+        parts.push('<text x="' + (W - 10).toFixed(1) + '" y="' + (Number(pyTarget) - 6).toFixed(1) + '" text-anchor="end" fill="#b91c1c" font-size="12" font-weight="800">Target S = $22,600 (n ≈ 31.79 ✕)</text>');
+      }
+
+      var callouts = [];
+
+      if (state.viewType === "cards" || isThomas) {
+        var ids = isThomas ? ["thomas"] : state.activeFuncs;
+        var bothBD = (!isThomas && ids.indexOf("B") !== -1 && ids.indexOf("D") !== -1);
+
+        // Continuous rays first
+        ids.forEach(function(fid) {
+          var fn = FUNCTIONS_DB[fid];
+          if (!fn) return;
+          if (fn.type === "ray_closed") {
+            parts.push(buildLineOrRaySvg(fn.xMinAllowed, +1, fn.m, fn.c, fn.color, 4.5, 0.95));
+            var ex = toPxX(fn.xMinAllowed), ey = toPxY(fn.c + fn.m * fn.xMinAllowed);
+            parts.push('<circle cx="' + ex.toFixed(1) + '" cy="' + ey.toFixed(1) + '" r="6.8" fill="' + fn.color + '" stroke="#ffffff" stroke-width="2" />');
+            tappablePoints.push({ px: ex, py: ey, x: fn.xMinAllowed });
+          } else if (fn.type === "ray_open") {
+            parts.push(buildLineOrRaySvg(fn.xMinAllowed, +1, fn.m, fn.c, fn.color, 4.5, 0.95));
+            var oxPt = toPxX(fn.xMinAllowed), oyPt = toPxY(fn.c + fn.m * fn.xMinAllowed);
+            parts.push('<circle cx="' + oxPt.toFixed(1) + '" cy="' + oyPt.toFixed(1) + '" r="7.5" fill="#ffffff" stroke="' + fn.color + '" stroke-width="3.4" />');
+          }
+        });
+
+        // Separate integer points (never joined)
+        ids.forEach(function(fid) {
+          var fn = FUNCTIONS_DB[fid];
+          if (!fn || fn.type !== "dots_int") return;
+          var kStart = Math.max(fn.xMinAllowed, Math.ceil(state.xmin));
+          var kEnd = Math.min(350, Math.floor(state.xmax));
+          var step = (kEnd - kStart > 80) ? Math.ceil((kEnd - kStart) / 80) : 1;
+
+          for (var k = kStart; k <= kEnd; k += step) {
+            var yv = fn.c + fn.m * k;
+            if (yv < state.ymin - ySpan * 0.05 || yv > state.ymax + ySpan * 0.05) continue;
+            var dpx = toPxX(k), dpy = toPxY(yv);
+            var rad = isThomas ? (xSpan < 12 ? 7.2 : 5.2) : 7.0;
+            if (bothBD && k === 2) rad = fid === "B" ? 8.8 : 4.8;
+
+            parts.push('<circle cx="' + dpx.toFixed(1) + '" cy="' + dpy.toFixed(1) + '" r="' + rad +
+              '" fill="' + (fn.fillColor || fn.color) + '" stroke="' + (fid === "B" ? "#b45309" : "#ffffff") +
+              '" stroke-width="' + (fid === "B" ? "2.5" : "2") + '" />');
+            tappablePoints.push({ px: dpx, py: dpy, x: k });
+          }
+        });
+
+        // Spotlight Point Labels
+        if (state.spotlight3Rep && ids.length >= 1) {
+          var pFn = FUNCTIONS_DB[ids[0]];
+          pFn.sampleXs.forEach(function(sx) {
+            callouts.push({ x: sx, y: pFn.c + pFn.m * sx, text: "(" + fmt(sx) + ", " + fmt(pFn.c + pFn.m * sx) + ")", color: pFn.color, spot: true });
+          });
+        }
+
+        if (isThomas) {
+          callouts.push({ x: 31, y: 22160, text: "(31, $22160)", color: "#1d4ed8", spot: true });
+          callouts.push({ x: 32, y: 22720, text: "(32, $22720)", color: "#1d4ed8", spot: true });
+        }
+
+        if (hasX) {
+          ids.forEach(function(fid) {
+            var fn = FUNCTIONS_DB[fid];
+            if (fn && fn.isAllowed(x)) {
+              var yy = fn.c + fn.m * x;
+              var dup = callouts.some(function(c) { return Math.abs(c.x - x) < 1e-5 && Math.abs(c.y - yy) < 1e-5; });
+              if (!dup) {
+                callouts.push({
+                  x: x,
+                  y: yy,
+                  text: (ids.length > 1 ? fn.id + ": " : "") + "(" + fmt(x) + ", " + fmt(yy) + ")",
+                  color: "#ea580c",
+                  spot: false
+                });
+              }
+            }
+          });
+        }
+
+      } else {
+        // Domains Comparison Mode
+        var cf = CONC_FORMULAS[state.concFormulaKey];
+        var m = cf.m, c = cf.c;
+
+        if (state.domReal) {
+          parts.push(buildLineOrRaySvg(0, 0, m, c, "#2563eb", 4.0, 0.92));
+        }
+        if (state.domNonNegReal) {
+          parts.push(buildLineOrRaySvg(0, +1, m, c, "#10b981", 11.5, 0.45));
+          parts.push('<circle cx="' + toPxX(0).toFixed(1) + '" cy="' + toPxY(c).toFixed(1) + '" r="7" fill="#059669" stroke="#ffffff" stroke-width="2" />');
+        }
+        if (state.domInt) {
+          var iMin = Math.max(-250, Math.ceil(state.xmin));
+          var iMax = Math.min(250, Math.floor(state.xmax));
+          for (var ki = iMin; ki <= iMax; ki++) {
+            var yi = m * ki + c;
+            if (yi < state.ymin - 5 || yi > state.ymax + 5) continue;
+            var ipx = toPxX(ki), ipy = toPxY(yi);
+            parts.push('<circle cx="' + ipx.toFixed(1) + '" cy="' + ipy.toFixed(1) + '" r="7.6" fill="#dc2626" stroke="#ffffff" stroke-width="2" />');
+            tappablePoints.push({ px: ipx, py: ipy, x: ki });
+          }
+        }
+        if (state.domNonNegInt) {
+          var nMin = Math.max(0, Math.ceil(state.xmin));
+          var nMax = Math.min(250, Math.floor(state.xmax));
+          for (var kn = nMin; kn <= nMax; kn++) {
+            var yn = m * kn + c;
+            if (yn < state.ymin - 5 || yn > state.ymax + 5) continue;
+            var npx = toPxX(kn), npy = toPxY(yn);
+            parts.push('<circle cx="' + npx.toFixed(1) + '" cy="' + npy.toFixed(1) + '" r="' + (state.domInt ? "4.6" : "7.4") + '" fill="#7c3aed" stroke="#ffffff" stroke-width="1.8" />');
+            tappablePoints.push({ px: npx, py: npy, x: kn });
+          }
+        }
+
+        if (hasX) {
+          var okAny = state.domReal || (state.domNonNegReal && state.x0 >= -1e-9) || (state.domInt && isInt(state.x0)) || (state.domNonNegInt && state.x0 >= -1e-9 && isInt(state.x0));
+          if (okAny) {
+            callouts.push({ x: state.x0, y: m * state.x0 + c, text: "(" + fmt(state.x0) + ", " + fmt(m * state.x0 + c) + ")", color: "#ea580c", spot: false });
+          }
+        }
+      }
+
+      // Collision-free Coordinate Callout Pills
+      var occupied = [];
+      callouts.forEach(function(item) {
+        var cpx = toPxX(item.x), cpy = toPxY(item.y);
+        if (cpx < 0 || cpx > W || cpy < 0 || cpy > H) return;
+
+        if (!item.spot || (hasX && Math.abs(item.x - state.x0) < 1e-5)) {
+          parts.push('<circle cx="' + cpx.toFixed(1) + '" cy="' + cpy.toFixed(1) + '" r="10.5" fill="rgba(249,115,22,0.25)" stroke="#ea580c" stroke-width="2.2" />');
+        }
+
+        var bw = Math.max(76, item.text.length * 7.5 + 14);
+        var bh = 23;
+        var tries = [
+          { x: cpx + 11, y: cpy - 27 },
+          { x: cpx - bw - 11, y: cpy - 27 },
+          { x: cpx + 11, y: cpy + 9 },
+          { x: cpx - bw - 11, y: cpy + 9 }
+        ];
+        var pick = tries[0];
+        for (var ti = 0; ti < tries.length; ti++) {
+          var cand = tries[ti];
+          var inside = cand.x >= 6 && cand.x + bw <= W - 6 && cand.y >= 6 && cand.y + bh <= H - 6;
+          var hit = occupied.some(function(r) {
+            return !(cand.x + bw + 4 < r.x || cand.x > r.x + r.w + 4 || cand.y + bh + 4 < r.y || cand.y > r.y + r.h + 4);
+          });
+          if (inside && !hit) { pick = cand; break; }
+        }
+        occupied.push({ x: pick.x, y: pick.y, w: bw, h: bh });
+
+        parts.push('<rect x="' + pick.x.toFixed(1) + '" y="' + pick.y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh +
+          '" rx="6" ry="6" fill="' + (item.spot ? "#f0fdfa" : "#fffbeb") + '" stroke="' + item.color + '" stroke-width="1.6" />');
+        parts.push('<text x="' + (pick.x + 7).toFixed(1) + '" y="' + (pick.y + 15.5).toFixed(1) + '" fill="#0f172a" font-size="12" font-weight="800">' + escXml(item.text) + '</text>');
+      });
+
+      parts.push('</svg>');
+      graphMount.innerHTML = parts.join("");
+      renderInkSvg();
+    }
+
+    // =====================================================================
+    // Coordinate-Locked Apple Pencil Ink Overlay (Injected into #inkMount)
+    // =====================================================================
+    function getInkBucket() {
+      return state.inkBuckets[state.viewType] || state.inkBuckets.cards;
+    }
+
+    var activeDrawId = null;
+    var curStroke = null;
+
+    function strokePathD(pts) {
+      if (!pts || !pts.length) return "";
+      var x0 = toPxX(pts[0].mx).toFixed(1), y0 = toPxY(pts[0].my).toFixed(1);
+      if (pts.length === 1) return "M" + x0 + "," + y0 + "L" + x0 + "," + y0;
+      var d = "M" + x0 + "," + y0;
+      for (var i = 1; i < pts.length - 1; i++) {
+        var cx = toPxX(pts[i].mx), cy = toPxY(pts[i].my);
+        var nx = toPxX(pts[i + 1].mx), ny = toPxY(pts[i + 1].my);
+        d += "Q" + cx.toFixed(1) + "," + cy.toFixed(1) + " " + ((cx + nx) / 2).toFixed(1) + "," + ((cy + ny) / 2).toFixed(1);
+      }
+      var last = pts[pts.length - 1];
+      d += "L" + toPxX(last.mx).toFixed(1) + "," + toPxY(last.my).toFixed(1);
+      return d;
+    }
+
+    function renderInkSvg() {
+      var W = state.plotW, H = state.plotH;
+      var bucket = getInkBucket();
+      var all = curStroke ? bucket.strokes.concat([curStroke]) : bucket.strokes;
+      if (!all.length) {
+        inkMount.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;width:100%;height:100%;touch-action:none;"></svg>';
+        return;
+      }
+      var svgParts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" style="display:block;width:100%;height:100%;touch-action:none;">'];
+      all.forEach(function(s) {
+        var d = strokePathD(s.pts);
+        if (!d) return;
+        svgParts.push('<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.tool === "highlighter" ? 22 : 3.8) +
+          '" stroke-linecap="round" stroke-linejoin="round" opacity="' + (s.tool === "highlighter" ? 0.35 : 1) + '" />');
+      });
+      svgParts.push('</svg>');
+      inkMount.innerHTML = svgParts.join("");
+    }
+
+    function eventToPlotCoords(e) {
+      var r = plotStage.getBoundingClientRect();
+      var px = ((e.clientX - r.left) / Math.max(1, r.width)) * state.plotW;
+      var py = ((e.clientY - r.top) / Math.max(1, r.height)) * state.plotH;
+      return { px: px, py: py, mx: toMathX(px), my: toMathY(py) };
+    }
+
+    function eraseAtPx(px, py) {
+      var b = getInkBucket();
+      b.strokes = b.strokes.filter(function(s) {
+        return !s.pts.some(function(pt) {
+          return Math.hypot(toPxX(pt.mx) - px, toPxY(pt.my) - py) < 20;
+        });
+      });
+    }
+
+    inkMount.addEventListener("pointerdown", function(e) {
+      if (!state.writeMode) return;
+      if (state.pencilOnly && e.pointerType !== "pen") return;
+      if (activeDrawId !== null) return;
+      e.preventDefault();
+      if (inkMount.setPointerCapture) inkMount.setPointerCapture(e.pointerId);
+      activeDrawId = e.pointerId;
+
+      var b = getInkBucket();
+      b.undo.push(JSON.parse(JSON.stringify(b.strokes)));
+      if (b.undo.length > 35) b.undo.shift();
+
+      var loc = eventToPlotCoords(e);
+      if (state.inkTool === "eraser") {
+        eraseAtPx(loc.px, loc.py);
+      } else {
+        curStroke = { tool: state.inkTool, color: state.inkColor, pts: [{ mx: loc.mx, my: loc.my }] };
+      }
+      renderInkSvg();
+    });
+
+    inkMount.addEventListener("pointermove", function(e) {
+      if (activeDrawId !== e.pointerId) return;
+      e.preventDefault();
+      var loc = eventToPlotCoords(e);
+      if (state.inkTool === "eraser") {
+        eraseAtPx(loc.px, loc.py);
+        renderInkSvg();
+      } else if (curStroke) {
+        var prev = curStroke.pts[curStroke.pts.length - 1];
+        if (Math.hypot(toPxX(loc.mx) - toPxX(prev.mx), toPxY(loc.my) - toPxY(prev.my)) >= 2) {
+          curStroke.pts.push({ mx: loc.mx, my: loc.my });
+          renderInkSvg();
+        }
+      }
+    });
+
+    function endInkStroke(e) {
+      if (activeDrawId !== e.pointerId) return;
+      if (curStroke) {
+        getInkBucket().strokes.push(curStroke);
+        curStroke = null;
+      }
+      activeDrawId = null;
+      renderInkSvg();
+    }
+    inkMount.addEventListener("pointerup", endInkStroke);
+    inkMount.addEventListener("pointercancel", endInkStroke);
+
+    // =====================================================================
+    // Interact Pan, Pinch-Zoom & Tap-a-Point Selection on #graphMount
+    // =====================================================================
+    var panPointers = {};
+    var downStart = null;
+    var lastMid = null;
+    var lastDist = null;
+    var dragged = false;
+
+    function pCount() { return Object.keys(panPointers).length; }
+
+    function zoomPlot(px, py, factor) {
+      var ax = toMathX(px), ay = toMathY(py);
+      var isT = state.viewType === "thomas";
+      var nxSpan = Math.max(isT ? 3 : 2, Math.min(isT ? 120 : 60, (state.xmax - state.xmin) * factor));
+      var nySpan = Math.max(isT ? 1200 : 12, Math.min(isT ? 90000 : 600, (state.ymax - state.ymin) * factor));
+      var rx = px / state.plotW;
+      var ry = (state.plotH - py) / state.plotH;
+      state.xmin = ax - rx * nxSpan;
+      state.xmax = state.xmin + nxSpan;
+      state.ymin = ay - ry * nySpan;
+      state.ymax = state.ymin + nySpan;
+      renderGraphSvg();
+    }
+
+    graphMount.addEventListener("pointerdown", function(e) {
+      if (state.writeMode) return;
+      e.preventDefault();
+      if (graphMount.setPointerCapture) graphMount.setPointerCapture(e.pointerId);
+      panPointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (pCount() === 1) {
+        downStart = { x: e.clientX, y: e.clientY };
+        lastMid = { x: e.clientX, y: e.clientY };
+        lastDist = null;
+        dragged = false;
+      } else if (pCount() >= 2) {
+        var ks = Object.keys(panPointers);
+        var p0 = panPointers[ks[0]], p1 = panPointers[ks[1]];
+        lastMid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+        lastDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        dragged = true;
+      }
+    });
+
+    graphMount.addEventListener("pointermove", function(e) {
+      if (state.writeMode || !panPointers[e.pointerId]) return;
+      e.preventDefault();
+      panPointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var r = plotStage.getBoundingClientRect();
+      var rw = Math.max(1, r.width), rh = Math.max(1, r.height);
+
+      if (pCount() === 1 && lastMid) {
+        if (downStart && Math.hypot(e.clientX - downStart.x, e.clientY - downStart.y) > 6) dragged = true;
+        var dxM = ((e.clientX - lastMid.x) / rw) * (state.xmax - state.xmin);
+        var dyM = ((e.clientY - lastMid.y) / rh) * (state.ymax - state.ymin);
+        state.xmin -= dxM; state.xmax -= dxM;
+        state.ymin += dyM; state.ymax += dyM;
+        lastMid = { x: e.clientX, y: e.clientY };
+        renderGraphSvg();
+      } else if (pCount() >= 2) {
+        var ks = Object.keys(panPointers);
+        var p0 = panPointers[ks[0]], p1 = panPointers[ks[1]];
+        var mid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+        var dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        if (lastDist && lastDist > 14) {
+          var px = ((mid.x - r.left) / rw) * state.plotW;
+          var py = ((mid.y - r.top) / rh) * state.plotH;
+          zoomPlot(px, py, lastDist / dist);
+        }
+        lastMid = mid;
+        lastDist = dist;
+      }
+    });
+
+    function endPanPointer(e) {
+      if (!dragged && pCount() === 1 && panPointers[e.pointerId]) {
+        var loc = eventToPlotCoords(e);
+        var best = null, bestD = 24;
+        tappablePoints.forEach(function(pt) {
+          var d = Math.hypot(pt.px - loc.px, pt.py - loc.py);
+          if (d < bestD) { bestD = d; best = pt; }
+        });
+        if (best) {
+          state.x0 = best.x;
+          renderPanelsAndLegend();
+          renderGraphSvg();
+        }
+      }
+      delete panPointers[e.pointerId];
+      if (pCount() === 1) {
+        var rem = panPointers[Object.keys(panPointers)[0]];
+        lastMid = { x: rem.x, y: rem.y };
+        lastDist = null;
+      } else {
+        lastMid = null;
+        lastDist = null;
+      }
+    }
+    graphMount.addEventListener("pointerup", endPanPointer);
+    graphMount.addEventListener("pointercancel", endPanPointer);
+
+    graphMount.addEventListener("wheel", function(e) {
+      if (state.writeMode) return;
+      e.preventDefault();
+      var loc = eventToPlotCoords(e);
+      zoomPlot(loc.px, loc.py, e.deltaY > 0 ? 1.15 : 0.87);
+    }, { passive: false });
+
+    // =====================================================================
+    // Wire Navigation, Take-away Cards, Keypad & Modals
+    // =====================================================================
+    function updateAll() {
+      syncChrome();
+      renderPanelsAndLegend();
+      renderGraphSvg();
+    }
+
+    document.getElementById("navAB").addEventListener("click", function() {
+      state.topNav = "ab"; state.viewType = "cards"; state.activeFuncs = ["A", "B"];
+      state.spotlight3Rep = false; state.x0 = 1.5; resetCamera(); updateAll();
+    });
+    document.getElementById("navCD").addEventListener("click", function() {
+      state.topNav = "cd"; state.viewType = "cards"; state.activeFuncs = ["C", "D"];
+      state.spotlight3Rep = false; state.x0 = 1.5; resetCamera(); updateAll();
+    });
+    document.getElementById("navDomains").addEventListener("click", function() {
+      state.topNav = "domains"; state.viewType = "domains";
+      state.spotlight3Rep = false; state.x0 = -1.5; resetCamera(); updateAll();
+    });
+    document.getElementById("navTakeaway").addEventListener("click", function() {
+      state.topNav = "takeaway"; applyTakeawayPreset(); updateAll();
+    });
+
+    document.getElementById("preAB").addEventListener("click", function() {
+      state.topNav = "ab"; state.viewType = "cards"; state.activeFuncs = ["A", "B"]; resetCamera(); updateAll();
+    });
+    document.getElementById("preCD").addEventListener("click", function() {
+      state.topNav = "cd"; state.viewType = "cards"; state.activeFuncs = ["C", "D"]; resetCamera(); updateAll();
+    });
+    document.getElementById("preABCD").addEventListener("click", function() {
+      state.viewType = "cards"; state.activeFuncs = ["A", "B", "C", "D"]; resetCamera(); updateAll();
+    });
+
+    [
+      ["chkA", "A"], ["chkB", "B"], ["chkC", "C"], ["chkD", "D"], ["chkNoodles", "noodles"]
+    ].forEach(function(pair) {
+      document.getElementById(pair[0]).addEventListener("change", function(e) {
+        var fid = pair[1];
+        if (e.target.checked) {
+          if (state.activeFuncs.indexOf(fid) === -1) state.activeFuncs.push(fid);
+        } else {
+          state.activeFuncs = state.activeFuncs.filter(function(k) { return k !== fid; });
+        }
+        state.viewType = "cards";
+        updateAll();
+      });
+    });
+
+    document.querySelectorAll(".cformula-btn").forEach(function(b) {
+      b.addEventListener("click", function() {
+        state.concFormulaKey = b.getAttribute("data-cformula");
+        resetCamera(); updateAll();
+      });
+    });
+
+    [
+      ["chkDomReal", "domReal"],
+      ["chkDomNonNegReal", "domNonNegReal"],
+      ["chkDomInt", "domInt"],
+      ["chkDomNonNegInt", "domNonNegInt"]
+    ].forEach(function(pair) {
+      document.getElementById(pair[0]).addEventListener("change", function(e) {
+        state[pair[1]] = e.target.checked;
+        updateAll();
+      });
+    });
+
+    // Key Take-away Stepper
+    document.getElementById("btnRevealNextTk").addEventListener("click", function() {
+      if (state.tkRevealedCount < 3) {
+        state.tkRevealedCount++;
+        state.tkActivePoint = state.tkRevealedCount;
+        applyTakeawayPreset();
+        updateAll();
+      }
+    });
+    document.getElementById("btnShowAllTk").addEventListener("click", function() {
+      state.tkRevealedCount = 3; updateAll();
+    });
+    document.getElementById("btnResetTk").addEventListener("click", function() {
+      state.tkRevealedCount = 1; state.tkActivePoint = 1; state.tk1Choice = "ab";
+      applyTakeawayPreset(); updateAll();
+    });
+    document.getElementById("tkLocked2").addEventListener("click", function() {
+      state.tkRevealedCount = Math.max(2, state.tkRevealedCount);
+      state.tkActivePoint = 2; applyTakeawayPreset(); updateAll();
+    });
+    document.getElementById("tkLocked3").addEventListener("click", function() {
+      state.tkRevealedCount = 3;
+      state.tkActivePoint = 3; applyTakeawayPreset(); updateAll();
+    });
+
+    [1, 2, 3].forEach(function(pt) {
+      document.getElementById("tkCard" + pt).addEventListener("click", function() {
+        state.tkActivePoint = pt; applyTakeawayPreset(); updateAll();
+      });
+    });
+    document.querySelectorAll("[data-tk1]").forEach(function(b) {
+      b.addEventListener("click", function(e) {
+        e.stopPropagation(); state.tkActivePoint = 1; state.tk1Choice = b.getAttribute("data-tk1");
+        applyTakeawayPreset(); updateAll();
+      });
+    });
+    document.querySelectorAll("[data-tk2]").forEach(function(b) {
+      b.addEventListener("click", function(e) {
+        e.stopPropagation(); state.tkActivePoint = 2; state.tk2Choice = b.getAttribute("data-tk2");
+        applyTakeawayPreset(); updateAll();
+      });
+    });
+    document.querySelectorAll("[data-tk3]").forEach(function(b) {
+      b.addEventListener("click", function(e) {
+        e.stopPropagation(); state.tkActivePoint = 3; state.tk3Choice = b.getAttribute("data-tk3");
+        applyTakeawayPreset(); updateAll();
+      });
+    });
+
+    // Spotlight & Maximize Graph
+    document.getElementById("btnToggleLabels").addEventListener("click", function() {
+      state.spotlight3Rep = !state.spotlight3Rep; updateAll();
+    });
+    document.getElementById("btnMaximizeGraph").addEventListener("click", function(e) {
+      state.maximized = !state.maximized;
+      document.getElementById("triGrid").classList.toggle("maximized", state.maximized);
+      e.currentTarget.textContent = state.maximized ? "◫ 3 Columns" : "⛶ Maximize Graph";
+      requestAnimationFrame(renderGraphSvg);
+    });
+
+    // Write Mode & Ink Toolbar
+    function setWriteMode(on) {
+      state.writeMode = on;
+      document.body.classList.toggle("write-mode", on);
+      document.getElementById("inkToolbar").style.display = on ? "flex" : "none";
+      document.getElementById("btnModeInteract").className = "min-h-[44px] px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 transition border " +
+        (!on ? "bg-teal-700 text-white border-teal-400" : "bg-white/10 text-slate-100 border-white/20");
+      document.getElementById("btnModeWrite").className = "min-h-[44px] px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 transition border " +
+        (on ? "bg-red-600 text-white border-red-300" : "bg-white/10 text-slate-100 border-white/20");
+      document.getElementById("graphModeHint").textContent = on
+        ? "Write Mode: Draw on graph (strokes lock to coordinates)"
+        : "Interact: Drag to pan · Pinch to zoom · Tap points";
+      requestAnimationFrame(renderGraphSvg);
+    }
+    document.getElementById("btnModeInteract").addEventListener("click", function() { setWriteMode(false); });
+    document.getElementById("btnModeWrite").addEventListener("click", function() { setWriteMode(true); });
+
+    document.querySelectorAll("[data-inktool]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        state.inkTool = btn.getAttribute("data-inktool");
+        document.querySelectorAll("[data-inktool]").forEach(function(b) {
+          b.className = "min-h-[38px] px-2.5 rounded-lg text-xs font-bold " + (b === btn ? "bg-white text-slate-900" : "bg-white/10 text-white");
+        });
+      });
+    });
+    document.querySelectorAll(".ink-swatch").forEach(function(sw) {
+      sw.addEventListener("click", function() {
+        state.inkColor = sw.getAttribute("data-inkcolor");
+        document.querySelectorAll(".ink-swatch").forEach(function(s) {
+          s.style.borderColor = s === sw ? "#ffffff" : "rgba(255,255,255,0.4)";
+          s.style.transform = s === sw ? "scale(1.12)" : "scale(1)";
+        });
+        if (state.inkTool === "eraser") document.getElementById("toolPen").click();
+      });
+    });
+    document.getElementById("btnPencilOnly").addEventListener("click", function(e) {
+      state.pencilOnly = !state.pencilOnly;
+      e.currentTarget.textContent = "Pencil Only: " + (state.pencilOnly ? "ON" : "OFF");
+      e.currentTarget.className = "min-h-[38px] px-2 rounded-lg text-xs font-bold border " +
+        (state.pencilOnly ? "bg-amber-400 text-slate-950 border-amber-300" : "bg-white/10 text-white border-white/20");
+    });
+    document.getElementById("btnInkUndo").addEventListener("click", function() {
+      var b = getInkBucket();
+      if (b.undo.length) { b.strokes = b.undo.pop(); renderInkSvg(); }
+    });
+    document.getElementById("btnInkClear").addEventListener("click", function() {
+      var b = getInkBucket();
+      if (b.strokes.length) {
+        b.undo.push(JSON.parse(JSON.stringify(b.strokes)));
+        b.strokes = [];
+        renderInkSvg();
+      }
+    });
+
+    // Zoom Buttons
+    document.getElementById("btnZoomIn").addEventListener("click", function() { zoomPlot(state.plotW / 2, state.plotH / 2, 0.78); });
+    document.getElementById("btnZoomOut").addEventListener("click", function() { zoomPlot(state.plotW / 2, state.plotH / 2, 1.28); });
+    document.getElementById("btnZoomFit").addEventListener("click", function() { resetCamera(); renderGraphSvg(); });
+
+    // Keypad Modal
+    function openKeypad() {
+      state.kpBuffer = isFinite(state.x0) ? fmt(state.x0) : "";
+      document.getElementById("kpDisplay").textContent = state.kpBuffer || "0";
+      document.getElementById("modalKeypad").style.display = "flex";
+    }
+    document.getElementById("btnOpenKeypad").addEventListener("click", openKeypad);
+    document.getElementById("btnTableKeypad").addEventListener("click", openKeypad);
+
+    document.querySelectorAll("[data-kp]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var k = btn.getAttribute("data-kp");
+        if (k === "thomas22600") {
+          state.x0 = 445 / 14;
+          document.getElementById("modalKeypad").style.display = "none";
+          renderPanelsAndLegend(); renderGraphSvg();
+          return;
+        }
+        if (k === "ok") {
+          var parsed = parseFloat(state.kpBuffer);
+          if (isFinite(parsed)) {
+            state.x0 = parsed;
+            renderPanelsAndLegend(); renderGraphSvg();
+          }
+          document.getElementById("modalKeypad").style.display = "none";
+          return;
+        }
+        if (k === "clr") state.kpBuffer = "";
+        else if (k === "bksp") state.kpBuffer = state.kpBuffer.slice(0, -1);
+        else if (k === "minus") state.kpBuffer = state.kpBuffer.indexOf("-") === 0 ? state.kpBuffer.slice(1) : "-" + state.kpBuffer;
+        else if (k === ".") { if (state.kpBuffer.indexOf(".") === -1) state.kpBuffer = (state.kpBuffer || "0") + "."; }
+        else { state.kpBuffer = state.kpBuffer === "0" ? k : (state.kpBuffer.length < 9 ? state.kpBuffer + k : state.kpBuffer); }
+        document.getElementById("kpDisplay").textContent = state.kpBuffer || "0";
+      });
+    });
+
+    // Challenges Modal
+    function renderChallenges() {
+      document.getElementById("chalTbody").innerHTML = CHALLENGE_DATA.map(function(row, idx) {
+        var rev = !!state.chalRevealed[idx];
+        var cell = function(o) {
+          if (!rev) return '<td class="border border-slate-300 p-2 text-slate-400 font-bold">?</td>';
+          return o.ok
+            ? '<td class="border border-slate-300 p-2 bg-emerald-50 text-emerald-800 font-extrabold">' + o.t + '</td>'
+            : '<td class="border border-slate-300 p-2 bg-red-50 text-red-700 font-extrabold">' + o.t + '</td>';
+        };
+        return '<tr><td class="border border-slate-300 p-2 font-extrabold">' + row.card + '<span class="block text-[10.5px] font-medium text-slate-500">' + row.sub + '</span></td>' +
+          cell(row.c25) + cell(row.c275) + cell(row.c40) +
+          '<td class="border border-slate-300 p-2"><button type="button" data-cidx="' + idx + '" class="min-h-[34px] px-2.5 rounded border border-slate-300 bg-slate-100 text-xs font-bold">' + (rev ? "Hide" : "Reveal") + '</button></td></tr>';
+      }).join("");
+
+      document.querySelectorAll("[data-cidx]").forEach(function(b) {
+        b.addEventListener("click", function() {
+          var i = Number(b.getAttribute("data-cidx"));
+          state.chalRevealed[i] = !state.chalRevealed[i];
+          renderChallenges();
+        });
+      });
+
+      document.getElementById("chalBudgetText").style.display = state.chalRevealed.budget ? "block" : "none";
+      document.getElementById("btnChalBudgetToggle").textContent = state.chalRevealed.budget ? "Hide Budget" : "Reveal Budget";
+    }
+
+    document.getElementById("btnOpenChallenges").addEventListener("click", function() {
+      renderChallenges();
+      document.getElementById("modalChallenges").style.display = "flex";
+    });
+    document.getElementById("btnChalShowAll").addEventListener("click", function() {
+      state.chalRevealed = { 0: true, 1: true, 2: true, 3: true, budget: true }; renderChallenges();
+    });
+    document.getElementById("btnChalHideAll").addEventListener("click", function() {
+      state.chalRevealed = { 0: false, 1: false, 2: false, 3: false, budget: false }; renderChallenges();
+    });
+    document.getElementById("btnChalBudgetToggle").addEventListener("click", function() {
+      state.chalRevealed.budget = !state.chalRevealed.budget; renderChallenges();
+    });
+
+    // Collaborative Task Conclusion Projection Modal
+    function openCollabModal() {
+      document.getElementById("modalCollabConclusion").style.display = "flex";
+    }
+    document.getElementById("btnOpenCollabModal").addEventListener("click", openCollabModal);
+    document.getElementById("btnEnlargeCollab").addEventListener("click", openCollabModal);
+
+    document.querySelectorAll("[data-close]").forEach(function(b) {
+      b.addEventListener("click", function() {
+        var targetModal = document.getElementById(b.getAttribute("data-close"));
+        if (targetModal) targetModal.style.display = "none";
+      });
+    });
+    ["modalCollabConclusion", "modalKeypad", "modalChallenges"].forEach(function(id) {
+      var modalEl = document.getElementById(id);
+      if (modalEl) {
+        modalEl.addEventListener("click", function(e) {
+          if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
+        });
+      }
+    });
+
+    // Responsive Redraws on Orientation / Resize / Font Load
+    window.addEventListener("resize", renderGraphSvg);
+    window.addEventListener("load", renderGraphSvg);
+    if (window.ResizeObserver) {
+      new ResizeObserver(function() { renderGraphSvg(); }).observe(plotStage);
+    }
+
+    // Immediate Initialization + Frame Confirmation
+    resetCamera();
+    updateAll();
+    requestAnimationFrame(renderGraphSvg);
+  })();
+  </script>
+</body>
+</html>
